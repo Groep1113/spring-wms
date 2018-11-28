@@ -27,5 +27,9 @@ targetCompatibility = 1.8
 
 dependencies {
     compile("org.springframework.boot:spring-boot-starter-web")
+    // JPA, Hibernate
+    compile 'org.springframework.boot:spring-boot-starter-data-jpa'
+    // MySQL connector
+    compile 'mysql:mysql-connector-java'
     testCompile('org.springframework.boot:spring-boot-starter-test')
 }
