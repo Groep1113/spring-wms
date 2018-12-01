@@ -5,8 +5,17 @@ type User {
     email: String!
 }
 
+type LoginPayload {
+  token: String
+  user: User
+}
+
 type Query {
     users: [User]!
     userByMail(email: String!): User
 	user(id: Int!): User
+}
+
+type Mutation {
+    login(email: String!, password: String!): LoginPayload
 }

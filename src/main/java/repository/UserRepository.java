@@ -19,8 +19,6 @@ public interface UserRepository extends CrudRepository<User, Integer> {
     }
 
     // @TODO: maybe return the token String instead
-//    Optional<User> authenticate(String email, String password);
-
     default Optional<User> authenticate(String email, String password) {
         Optional optUser = this.findByEmail(email);
         if (!optUser.isPresent()) return Optional.empty();
