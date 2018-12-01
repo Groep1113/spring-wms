@@ -11,6 +11,7 @@ import javax.persistence.Id;
 @JsonIgnoreProperties({"password"}) // never return the password!
 @Entity // This tells Hibernate to make a table out of this class
 public class User {
+    // fields
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
@@ -23,16 +24,9 @@ public class User {
 
     private String password;
 
+    // getters
     public Integer getId() {
         return id;
-    }
-
-    public void setPassword(String pw) {
-        this.password = BCrypt.hashpw(pw, BCrypt.gensalt());
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getFirstName() {
@@ -43,6 +37,23 @@ public class User {
         return lastName;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    // setters
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setPassword(String pw) {
+        this.password = BCrypt.hashpw(pw, BCrypt.gensalt());
+    }
+
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -51,15 +62,7 @@ public class User {
         this.lastName = lastName;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
     }
 }
