@@ -1,16 +1,14 @@
 package entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.mindrot.jbcrypt.BCrypt;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCrypt;
-import repository.UserRepository;
-
-import java.util.Optional;
-
+@JsonIgnoreProperties({"password"}) // never return the password!
 @Entity // This tells Hibernate to make a table out of this class
 public class User {
     @Id
@@ -61,16 +59,7 @@ public class User {
         this.email = email;
     }
 
-
-    @Autowired // This means to get the bean called userRepository
-    private UserRepository userRepository;
-
-    // @TODO: maybe return the token String instead
-    public User authenticate(String email, String password) {
-        Optional optUser = userRepository.findByEmail(email);
-        if (!optUser.isPresent()) return null;
-        User user = ((User) optUser.get());
-        if (!BCrypt.checkpw(password, user.password)) return null;
-        return user;
+    public String getPassword() {
+        return password;
     }
 }

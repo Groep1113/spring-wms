@@ -1,5 +1,6 @@
 package repository;
 
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.data.repository.CrudRepository;
 
 import entity.User;
@@ -15,6 +16,17 @@ public interface UserRepository extends CrudRepository<User, Integer> {
 
     default Optional<User> findByEmail(User user) {
         return findByEmail(user == null ? null : user.getEmail());
+    }
+
+    // @TODO: maybe return the token String instead
+//    Optional<User> authenticate(String email, String password);
+
+    default Optional<User> authenticate(String email, String password) {
+        Optional optUser = this.findByEmail(email);
+        if (!optUser.isPresent()) return Optional.empty();
+        User user = ((User) optUser.get());
+        if (!BCrypt.checkpw(password, user.getPassword())) return Optional.empty();
+        return Optional.of(user);
     }
 
 }

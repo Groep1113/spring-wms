@@ -27,8 +27,8 @@ targetCompatibility = 1.8
 
 dependencies {
     compile 'org.springframework.boot:spring-boot-starter-web'
-    // Spring Security (incl BCrypt)
-    compile 'org.springframework.boot:spring-boot-starter-security'
+    // jBCrypt by jeremyh
+    compile 'org.mindrot:jbcrypt:0.4'
     // JPA, Hibernate
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
     // MySQL connector

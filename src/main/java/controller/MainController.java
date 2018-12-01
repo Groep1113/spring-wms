@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import repository.UserRepository;
 
+import java.util.Optional;
+
 @Controller    // This means that this class is a Controller
 @RequestMapping(path="/demo") // This means URL's start with /demo (after Application path)
 public class MainController {
@@ -35,5 +37,14 @@ public class MainController {
     public @ResponseBody Iterable<User> getAllUsers() {
         // This returns a JSON or XML with the users
         return userRepository.findAll();
+    }
+
+    @GetMapping(path="/auth")
+    public @ResponseBody User authTest(
+        @RequestParam String email, @RequestParam String password
+    ) {
+        Optional userOpt = userRepository.authenticate(email, password);
+        if (!userOpt.isPresent()) return null;
+        return ((User) userOpt.get());
     }
 }
