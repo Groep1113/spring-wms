@@ -37,6 +37,8 @@ jobs:
           paths:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
+
+      - run: ./gradlew sonarqube -Dsonar.projectKey=Groep1113_spring-wms -Dsonar.organization=groep1113 -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=d094f11e1feea9b19f3f677867458489955f6322
           
 
       # run tests!
