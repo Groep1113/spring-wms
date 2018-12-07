@@ -10,10 +10,19 @@ type LoginPayload {
   user: User
 }
 
+type Item {
+    id: Int!
+    name: String!
+    code: String!
+    recommended_stock: Int!
+}
+
 type Query {
     users: [User]!
     userByMail(email: String!): User
 	user(id: Int!): User
+	items: [Item]!
+	item(id: Int!): Item
 }
 
 type Mutation {
