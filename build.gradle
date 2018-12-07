@@ -23,6 +23,7 @@ bootJar {
 }
 
 repositories {
+    jcenter()
     mavenCentral()
 }
 
@@ -30,11 +31,22 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 dependencies {
-    compile("org.springframework.boot:spring-boot-starter-web")
+    compile 'org.springframework.boot:spring-boot-starter-web'
+    // jBCrypt by jeremyh
+    compile 'org.mindrot:jbcrypt:0.4'
     // JPA, Hibernate
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
     // MySQL connector
     compile 'mysql:mysql-connector-java'
     compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
     testCompile('org.springframework.boot:spring-boot-starter-test')
+
+    // GraphQL
+    compile 'com.graphql-java-kickstart:graphql-spring-boot-starter:5.3.1'
+    // to embed GraphiQL tool
+    compile 'com.graphql-java-kickstart:graphiql-spring-boot-starter:5.3.1'
+    // to embed Voyager tool
+    compile 'com.graphql-java-kickstart:voyager-spring-boot-starter:5.3.1'
+    // testing facilities
+    testCompile 'com.graphql-java-kickstart:graphql-spring-boot-starter-test:5.3.1'
 }
