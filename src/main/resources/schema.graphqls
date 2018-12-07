@@ -17,12 +17,22 @@ type Item {
     recommended_stock: Int!
 }
 
+type Location {
+    id: Int!
+    code: String!
+    depth: Int!
+    width: Int!
+    height: Int!
+}
+
 type Query {
     users: [User]!
     userByMail(email: String!): User
 	user(id: Int!): User
 	items: [Item]!
 	item(id: Int!): Item
+	locations: [Location]!
+	location(id: Int!): Location
 }
 
 type Mutation {
