@@ -3,6 +3,7 @@ package graphql;
 import base.TokenManager;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
 import entity.User;
+import graphql.schema.DataFetchingEnvironment;
 import graphql.types.LoginPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,14 +19,15 @@ public class Mutation implements GraphQLMutationResolver {
         this.userRepository = userRepository;
     }
 
-    public LoginPayload login(String email, String password) throws IllegalAccessException {
+    public LoginPayload login(String email, String password) throws GraphQLException {
         User user = userRepository
             .authenticate(email, password)
             .orElse(null);
-        if (user == null) {
-            throw new GraphQLException("Invalid login");
-        }
-        String token = TokenManager.generateToken(user);
+        if (user == null) throw new GraphQLException("Invalid login");
+
+        String token = TokenManager.generateToken();
+        user.setToken(token);
+        userRepository.save(user);
 
         return new LoginPayload(token, user);
     }

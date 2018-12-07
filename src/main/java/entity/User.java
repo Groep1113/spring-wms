@@ -24,6 +24,8 @@ public class User {
 
     private String password;
 
+    private String token;
+
     // getters
     public Integer getId() {
         return id;
@@ -45,6 +47,10 @@ public class User {
         return password;
     }
 
+    public String getToken() {
+        return token;
+    }
+
     // setters
     public void setId(Integer id) {
         this.id = id;
@@ -64,5 +70,9 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

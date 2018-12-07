@@ -18,6 +18,12 @@ public interface UserRepository extends CrudRepository<User, Integer> {
         return findByEmail(user == null ? null : user.getEmail());
     }
 
+    Optional<User> findByToken(String token);
+
+    default Optional<User> findByToken(User user) {
+        return findByToken(user == null ? null : user.getToken());
+    }
+
     // @TODO: maybe return the token String instead
     default Optional<User> authenticate(String email, String password) {
         Optional optUser = this.findByEmail(email);
@@ -26,5 +32,4 @@ public interface UserRepository extends CrudRepository<User, Integer> {
         if (!BCrypt.checkpw(password, user.getPassword())) return Optional.empty();
         return Optional.of(user);
     }
-
 }
