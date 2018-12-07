@@ -18,13 +18,12 @@ public class Mutation implements GraphQLMutationResolver {
         this.userRepository = userRepository;
     }
 
-    public LoginPayload login(String email, String password) {
+    public LoginPayload login(String email, String password) throws IllegalAccessException {
         User user = userRepository
             .authenticate(email, password)
             .orElse(null);
         if (user == null) {
-            // @TODO: does throwing an exception work for errors?
-            return null;
+            throw new GraphQLException("Invalid login");
         }
         String token = TokenManager.generateToken(user);
 

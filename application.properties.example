@@ -1,6 +1,13 @@
-# Replace the uppercase blocks
+server.port=9000
 
+# Replace the uppercase blocks
 spring.jpa.hibernate.ddl-auto=update
 spring.datasource.url=jdbc:mysql://localhost:{PORT}/{DATABASE}
 spring.datasource.username={DB_USER}
 spring.datasource.password={DB_PASSWORD}
+
+# GraphQL
+graphql.servlet.mapping=/graphql
+graphql.servlet.enabled=true
+graphql.servlet.corsEnabled=false
+graphql.servlet.exception-handlers-enabled=true
