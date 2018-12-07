@@ -7,6 +7,10 @@ buildscript {
     }
 }
 
+plugins {
+    id "org.sonarqube" version "2.6"
+}
+
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
@@ -34,6 +38,7 @@ dependencies {
     compile 'org.springframework.boot:spring-boot-starter-data-jpa'
     // MySQL connector
     compile 'mysql:mysql-connector-java'
+    compile group: 'javax.xml.bind', name: 'jaxb-api', version: '2.3.1'
     testCompile('org.springframework.boot:spring-boot-starter-test')
 
     // GraphQL
