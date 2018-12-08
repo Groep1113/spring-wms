@@ -15,6 +15,7 @@ type Item {
     name: String!
     code: String!
     recommended_stock: Int!
+    locations: [Location]!
 }
 
 type Location {
@@ -23,6 +24,7 @@ type Location {
     depth: Int!
     width: Int!
     height: Int!
+    items: [Item]!
 }
 
 type Query {

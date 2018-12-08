@@ -1,9 +1,7 @@
 package entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 public class Item {
@@ -13,6 +11,9 @@ public class Item {
     private String name;
     private String code;
     private Integer recommended_stock;
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinTable
+    private Set<Location> locations;
 
     public Integer getId() {
         return id;

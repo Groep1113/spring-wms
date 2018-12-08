@@ -1,9 +1,7 @@
 package entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.Set;
 
 @Entity
 public class Location {
@@ -14,6 +12,8 @@ public class Location {
     private Integer depth;
     private Integer width;
     private Integer height;
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "locations")
+    private Set<Item> items;
 
     public Integer getId() {
         return id;
