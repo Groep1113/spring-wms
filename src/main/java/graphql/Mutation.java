@@ -42,8 +42,8 @@ public class Mutation implements GraphQLMutationResolver {
         return new LoginPayload(token, user);
     }
 
-    public Item createItem(String name, String code, int recommended_stock) throws GraphQLException {
-        return itemRepository.save(new Item(name, code, recommended_stock));
+    public Item createItem(String name, String code, int recommended_stock, int locationId) throws GraphQLException {
+        return itemRepository.save(new Item(name, code, recommended_stock, locationRepository.findById(locationId).get()));
     }
 
     public Location createLocation(String code, int depth, int width, int height) throws GraphQLException {

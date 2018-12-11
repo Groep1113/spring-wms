@@ -1,6 +1,7 @@
 package entity;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -13,13 +14,16 @@ public class Location {
     private Integer width;
     private Integer height;
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "locations")
-    private Set<Item> items;
+    private Set<Item> items = new HashSet<Item>();
 
     public Location(String code, Integer depth, Integer width, Integer height) {
         this.code = code;
         this.depth = depth;
         this.width = width;
         this.height = height;
+    }
+
+    public Location() {
     }
 
     public Integer getId() {
@@ -60,5 +64,13 @@ public class Location {
 
     public void setHeight(Integer height) {
         this.height = height;
+    }
+
+    public Set<Item> getItems() {
+        return items;
+    }
+
+    public void setItems(Set<Item> items) {
+        this.items = items;
     }
 }
