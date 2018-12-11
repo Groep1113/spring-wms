@@ -15,6 +15,13 @@ public class Location {
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "locations")
     private Set<Item> items;
 
+    public Location(String code, Integer depth, Integer width, Integer height) {
+        this.code = code;
+        this.depth = depth;
+        this.width = width;
+        this.height = height;
+    }
+
     public Integer getId() {
         return id;
     }
