@@ -15,6 +15,12 @@ public class Item {
     @JoinTable
     private Set<Location> locations;
 
+    public Item(String name, String code, Integer recommended_stock) {
+        this.name = name;
+        this.code = code;
+        this.recommended_stock = recommended_stock;
+    }
+
     public Integer getId() {
         return id;
     }
