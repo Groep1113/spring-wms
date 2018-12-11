@@ -25,6 +25,9 @@ public class Item {
         locations.add(location);
     }
 
+    public Item() {
+    }
+
     public Integer getId() {
         return id;
     }

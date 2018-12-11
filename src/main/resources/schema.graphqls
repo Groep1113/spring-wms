@@ -41,4 +41,5 @@ type Mutation {
     login(email: String!, password: String!): LoginPayload
     createItem(name: String!, code: String!, recommended_stock: Int!, locationId: Int!): Item
     createLocation(code: String!, depth: Int!, width: Int!, height: Int!): Location
+    itemChangeLocation(itemId: Int!, locationId: Int!): Item
 }
