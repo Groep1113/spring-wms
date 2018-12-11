@@ -13,6 +13,9 @@ import repository.ItemRepository;
 import repository.LocationRepository;
 import repository.UserRepository;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Component
 public class Mutation implements GraphQLMutationResolver {
 
@@ -48,6 +51,18 @@ public class Mutation implements GraphQLMutationResolver {
 
     public Location createLocation(String code, int depth, int width, int height) throws GraphQLException {
         return locationRepository.save(new Location(code, depth, width, height));
+    }
+
+    // TODO: pas de repository aan zodat deze code wat netter wordt.
+    // TODO: pas de repository aan zodat de setters ook many-to-many zijn
+    public Item itemChangeLocation(int id, int locationId) throws GraphQLException {
+        Location location = locationRepository.findById(locationId).get();
+        Set<Location> locations = new HashSet<>();
+        locations.add(location);
+        Item item = itemRepository.findById(id).get();
+        item.setLocations(locations);
+        itemRepository.save(item);
+        return item;
     }
 
 }
