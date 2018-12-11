@@ -1,6 +1,7 @@
 package entity;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -11,14 +12,17 @@ public class Item {
     private String name;
     private String code;
     private Integer recommended_stock;
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinTable
-    private Set<Location> locations;
 
-    public Item(String name, String code, Integer recommended_stock) {
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable
+    private Set<Location> locations = new HashSet<Location>();
+
+    public Item(String name, String code, Integer recommended_stock, Location location) {
         this.name = name;
         this.code = code;
         this.recommended_stock = recommended_stock;
+        this.locations = new HashSet<>();
+        locations.add(location);
     }
 
     public Integer getId() {
@@ -51,5 +55,13 @@ public class Item {
 
     public void setRecommended_stock(Integer recommended_stock) {
         this.recommended_stock = recommended_stock;
+    }
+
+    public Set<Location> getLocations() {
+        return locations;
+    }
+
+    public void setLocations(Set<Location> locations) {
+        this.locations = locations;
     }
 }
