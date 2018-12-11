@@ -65,4 +65,21 @@ public class Mutation implements GraphQLMutationResolver {
         return item;
     }
 
+    // TODO: pas repository aan zodat boolean terug wordt gegeven.
+    public Boolean deleteItem(int id) throws GraphQLException {
+        if (itemRepository.existsById(id)) {
+            itemRepository.delete(itemRepository.findById(id).get());
+            return true;
+        }
+        else { return false; }
+    }
+
+    // TODO: pas repository aan zodat boolean terug wordt gegeven.
+    public Boolean deleteLocation(int id) throws GraphQLException {
+        if (locationRepository.existsById(id)) {
+            locationRepository.delete(locationRepository.findById(id).get());
+            return true;
+        }
+        else { return false; }
+    }
 }
