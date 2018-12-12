@@ -11,16 +11,16 @@ public class Item {
     private Integer id;
     private String name;
     private String code;
-    private Integer recommended_stock;
+    private Integer recommendedStock;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable
-    private Set<Location> locations = new HashSet<Location>();
+    private Set<Location> locations = new HashSet<>();
 
-    public Item(String name, String code, Integer recommended_stock, Location location) {
+    public Item(String name, String code, Integer recommendedStock, Location location) {
         this.name = name;
         this.code = code;
-        this.recommended_stock = recommended_stock;
+        this.recommendedStock = recommendedStock;
         this.locations = new HashSet<>();
         locations.add(location);
     }
@@ -52,12 +52,12 @@ public class Item {
         this.code = code;
     }
 
-    public Integer getRecommended_stock() {
-        return recommended_stock;
+    public Integer getRecommendedStock() {
+        return recommendedStock;
     }
 
-    public void setRecommended_stock(Integer recommended_stock) {
-        this.recommended_stock = recommended_stock;
+    public void setRecommendedStock(Integer recommendedStock) {
+        this.recommendedStock = recommendedStock;
     }
 
     public Set<Location> getLocations() {
