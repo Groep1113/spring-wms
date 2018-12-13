@@ -46,7 +46,12 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Item createItem(String name, String code, int recommended_stock, int locationId) {
-        return itemRepository.save(new Item(name, code, recommended_stock, locationRepository.findById(locationId).get()));
+        Optional<Location> optLocation = locationRepository.findById(locationId);
+        if (!optLocation.isPresent()) throw new GraphQLException("Could not find locationId");
+
+        return itemRepository.save(
+            new Item(name, code, recommended_stock, optLocation.get())
+        );
     }
 
     public Location createLocation(String code, int depth, int width, int height) {
