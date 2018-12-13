@@ -14,7 +14,7 @@ public class Location {
     private Integer width;
     private Integer height;
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "locations")
-    private Set<Item> items = new HashSet<Item>();
+    private Set<Item> items = new HashSet<>();
 
     public Location(String code, Integer depth, Integer width, Integer height) {
         this.code = code;
