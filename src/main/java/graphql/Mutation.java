@@ -110,4 +110,13 @@ public class Mutation implements GraphQLMutationResolver {
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, Location.class.getSimpleName()))));
         return true;
     }
+
+    public Boolean deleteCategory(int id, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        categoryRepository.delete(categoryRepository
+                .findById(id)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, Category.class.getSimpleName()))));
+        return true;
+    }
 }

@@ -52,4 +52,5 @@ type Mutation {
     itemChangeLocation(itemId: Int!, locationId: Int!): Item
     deleteItem(itemId: Int!): Boolean
     deleteLocation(locationId: Int!): Boolean
+    deleteCategory(categoryId: Int!): Boolean
 }
