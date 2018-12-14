@@ -2,6 +2,7 @@ package graphql;
 
 import base.TokenManager;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import entity.Category;
 import entity.Item;
 import entity.Location;
 import entity.User;
@@ -9,6 +10,7 @@ import graphql.schema.DataFetchingEnvironment;
 import graphql.types.LoginPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import repository.CategoryRepository;
 import repository.ItemRepository;
 import repository.LocationRepository;
 import repository.UserRepository;
@@ -20,14 +22,17 @@ public class Mutation implements GraphQLMutationResolver {
     private UserRepository userRepository;
     private ItemRepository itemRepository;
     private LocationRepository locationRepository;
+    private CategoryRepository categoryRepository;
 
     @Autowired
     public Mutation(UserRepository userRepository,
                     ItemRepository itemRepository,
-                    LocationRepository locationRepository) {
+                    LocationRepository locationRepository,
+                    CategoryRepository categoryRepository) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
         this.locationRepository = locationRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     private String idNotFoundMessage(int id, String entity){
@@ -63,6 +68,12 @@ public class Mutation implements GraphQLMutationResolver {
         AuthContext.requireAuth(env);
         
         return locationRepository.save(new Location(code, depth, width, height));
+    }
+
+    public Category createCategory(String name, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return categoryRepository.save(new Category(name));
     }
 
     public Item itemChangeLocation(int itemId, int locationId, DataFetchingEnvironment env) {

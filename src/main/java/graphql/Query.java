@@ -1,12 +1,14 @@
 package graphql;
 
 import com.coxautodev.graphql.tools.GraphQLQueryResolver;
+import entity.Category;
 import entity.Item;
 import entity.Location;
 import entity.User;
 import graphql.schema.DataFetchingEnvironment;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import repository.CategoryRepository;
 import repository.ItemRepository;
 import repository.LocationRepository;
 import repository.UserRepository;
@@ -19,14 +21,17 @@ public class Query implements GraphQLQueryResolver {
     private UserRepository userRepository;
     private ItemRepository itemRepository;
     private LocationRepository locationRepository;
+    private CategoryRepository categoryRepository;
 
     @Autowired
     public Query(UserRepository userRepository,
                  ItemRepository itemRepository,
-                 LocationRepository locationRepository) {
+                 LocationRepository locationRepository,
+                 CategoryRepository categoryRepository) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
         this.locationRepository = locationRepository;
+        this.categoryRepository = categoryRepository;
     }
 
 
@@ -78,6 +83,18 @@ public class Query implements GraphQLQueryResolver {
         AuthContext.requireAuth(env);
 
         return locationRepository.findById(id).orElse(null);
+    }
+
+    public Category getCategory(Integer id, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return categoryRepository.findById(id).orElse(null);
+    }
+
+    public List<Category> getCategories(DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return ((List<Category>) categoryRepository.findAll());
     }
 
 }

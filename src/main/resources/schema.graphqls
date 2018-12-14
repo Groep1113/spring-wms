@@ -27,6 +27,11 @@ type Location {
     items: [Item]!
 }
 
+type Category {
+    id: Int!
+    name: String!
+}
+
 type Query {
     users: [User]!
     userByMail(email: String!): User
@@ -35,12 +40,15 @@ type Query {
 	item(id: Int!): Item
 	locations: [Location]!
 	location(id: Int!): Location
+    categories: [Category]!
+    category(id: Int!): Category
 }
 
 type Mutation {
     login(email: String!, password: String!): LoginPayload
     createItem(name: String!, code: String!, recommendedStock: Int!, locationId: Int!): Item
     createLocation(code: String!, depth: Int!, width: Int!, height: Int!): Location
+    createCategory(name: String!): Category
     itemChangeLocation(itemId: Int!, locationId: Int!): Item
     deleteItem(itemId: Int!): Boolean
     deleteLocation(locationId: Int!): Boolean
