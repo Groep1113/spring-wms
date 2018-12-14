@@ -50,6 +50,7 @@ type Mutation {
     createLocation(code: String!, depth: Int!, width: Int!, height: Int!): Location
     createCategory(name: String!): Category
     itemChangeLocation(itemId: Int!, locationId: Int!): Item
+    categoryChangeName(categoryId: Int!, name: String!): Category
     deleteItem(itemId: Int!): Boolean
     deleteLocation(locationId: Int!): Boolean
     deleteCategory(categoryId: Int!): Boolean
