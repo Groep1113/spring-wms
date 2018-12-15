@@ -108,7 +108,6 @@ public class Mutation implements GraphQLMutationResolver {
             if (cat.getId() == categoryId) { throw new GraphQLException("Item (id:" + itemId + ") is already added to this category (id:" + categoryId + ")."); }
         }
         categories.add(category);
-        item.setCategories(categories);
         return itemRepository.save(item);
     }
 
@@ -138,6 +137,42 @@ public class Mutation implements GraphQLMutationResolver {
 
         category.setName(name);
         return categoryRepository.save(category);
+    }
+
+    public Category categoryAddLocation(int categoryId, int locationId, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Category category = categoryRepository
+                .findById(categoryId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(categoryId, Category.class.getSimpleName())));
+
+        Location location = locationRepository
+                .findById(locationId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
+
+        Set<Location> locations = category.getLocations();
+        for (Location loc: locations) {
+            if (loc.getId() == locationId) { throw new GraphQLException("Location (id:" + locationId+ ") is already added to this category (id:" + categoryId + ")."); }
+        }
+        locations.add(location);
+        return categoryRepository.save(category);
+    }
+
+    public Category categoryRemoveLocation(int categoryId, int locationId, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Category category = categoryRepository
+                .findById(categoryId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(categoryId, Category.class.getSimpleName())));
+
+        Set<Location> locations = category.getLocations();
+        for (Location location : locations) {
+            if (location.getId() == locationId) {
+                locations.remove(location);
+                return categoryRepository.save(category);
+            }
+        }
+        throw new GraphQLException("This location (id:" + locationId + ") is not part of this category (id:" + categoryId + "). Therefore, it can not be removed from it.");
     }
 
     public Boolean deleteItem(int id, DataFetchingEnvironment env) {

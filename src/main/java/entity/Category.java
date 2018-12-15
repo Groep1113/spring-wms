@@ -17,6 +17,10 @@ public class Category {
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "categories")
     private Set<Item> items;
 
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable
+    private Set<Location> locations;
+
     public Category() {
     }
 
@@ -46,5 +50,13 @@ public class Category {
 
     public void setItems(Set<Item> items) {
         this.items = items;
+    }
+
+    public Set<Location> getLocations() {
+        return locations;
+    }
+
+    public void setLocations(Set<Location> locations) {
+        this.locations = locations;
     }
 }
