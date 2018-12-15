@@ -16,6 +16,7 @@ type Item {
     code: String!
     recommendedStock: Int!
     locations: [Location]!
+    categories: [Category]!
 }
 
 type Location {
@@ -30,6 +31,7 @@ type Location {
 type Category {
     id: Int!
     name: String!
+    items: [Item]!
 }
 
 type Query {
@@ -50,6 +52,8 @@ type Mutation {
     createLocation(code: String!, depth: Int!, width: Int!, height: Int!): Location
     createCategory(name: String!): Category
     itemChangeLocation(itemId: Int!, locationId: Int!): Item
+    itemAddCategory(itemId: Int!, categoryId: Int!): Item
+    itemRemoveCategory(itemId: Int!, categoryId: Int!): Item
     categoryChangeName(categoryId: Int!, name: String!): Category
     deleteItem(itemId: Int!): Boolean
     deleteLocation(locationId: Int!): Boolean

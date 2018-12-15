@@ -92,6 +92,43 @@ public class Mutation implements GraphQLMutationResolver {
         return itemRepository.save(item);
     }
 
+    public Item itemAddCategory(int itemId, int categoryId, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Item item = itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
+
+        Category category = categoryRepository
+                .findById(categoryId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(categoryId, Category.class.getSimpleName())));
+
+        Set<Category> categories = item.getCategories();
+        for (Category cat: categories) {
+            if (cat.getId() == categoryId) { throw new GraphQLException("Item (id:" + itemId + ") is already added to this category (id:" + categoryId + ")."); }
+        }
+        categories.add(category);
+        item.setCategories(categories);
+        return itemRepository.save(item);
+    }
+
+    public Item itemRemoveCategory(int itemId, int categoryId, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Item item = itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
+
+        Set<Category> categories = item.getCategories();
+        for (Category category : categories) {
+            if (category.getId() == categoryId) {
+                categories.remove(category);
+                return itemRepository.save(item);
+            }
+        }
+        throw new GraphQLException("This item (id:" + itemId + ") is not part of this category (id:" + categoryId + "). Therefore, it can not be removed from it.");
+    }
+
     public Category categoryChangeName(int id, String name, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 

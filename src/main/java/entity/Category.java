@@ -1,7 +1,7 @@
 package entity;
 
 import javax.persistence.*;
-import java.util.HashSet;
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Entity
@@ -11,7 +11,11 @@ public class Category {
     @GeneratedValue
     private Integer id;
 
+    @NotNull
     private String name;
+
+    @ManyToMany(fetch = FetchType.EAGER, mappedBy = "categories")
+    private Set<Item> items;
 
     public Category() {
     }
@@ -34,5 +38,13 @@ public class Category {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Set<Item> getItems() {
+        return items;
+    }
+
+    public void setItems(Set<Item> items) {
+        this.items = items;
     }
 }

@@ -17,12 +17,17 @@ public class Item {
     @JoinTable
     private Set<Location> locations = new HashSet<>();
 
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinTable
+    private Set<Category> categories;
+
     public Item(String name, String code, Integer recommendedStock, Location location) {
         this.name = name;
         this.code = code;
         this.recommendedStock = recommendedStock;
         this.locations = new HashSet<>();
         locations.add(location);
+        this.categories = new HashSet<>();
     }
 
     public Item() {
@@ -66,5 +71,21 @@ public class Item {
 
     public void setLocations(Set<Location> locations) {
         this.locations = locations;
+    }
+
+    public Set<Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Set<Category> categories) {
+        this.categories = categories;
+    }
+
+    public void addCategory(Category category) {
+        categories.add(category);
+    }
+
+    public void removeCategory(Category category) {
+        categories.remove(category);
     }
 }
