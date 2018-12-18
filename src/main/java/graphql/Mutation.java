@@ -39,7 +39,7 @@ public class Mutation implements GraphQLMutationResolver {
         return "No " + entity.toLowerCase() + " found with id " + id + ".";
     }
 
-    public LoginPayload login(String email, String password) throws GraphQLException {
+    public LoginPayload login(String email, String password) {
         User user = userRepository
             .authenticate(email, password)
             .orElse(null);
