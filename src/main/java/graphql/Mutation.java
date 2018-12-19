@@ -15,7 +15,6 @@ import repository.ItemRepository;
 import repository.LocationRepository;
 import repository.UserRepository;
 
-import javax.xml.crypto.Data;
 import java.util.Set;
 
 @Component
