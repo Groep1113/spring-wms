@@ -56,6 +56,9 @@ public class User {
         this.id = id;
     }
 
+    /**
+     * @param pw Password as a plaintext string
+     */
     public void setPassword(String pw) {
         this.password = BCrypt.hashpw(pw, BCrypt.gensalt());
     }

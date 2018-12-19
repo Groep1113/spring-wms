@@ -14,6 +14,8 @@ import repository.CategoryRepository;
 import repository.ItemRepository;
 import repository.LocationRepository;
 import repository.UserRepository;
+
+import javax.xml.crypto.Data;
 import java.util.Set;
 
 @Component
@@ -200,5 +202,17 @@ public class Mutation implements GraphQLMutationResolver {
                 .findById(id)
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, Category.class.getSimpleName()))));
         return true;
+    }
+
+    public User createUser(String firstName, String lastName, String email, String password, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        User user = new User();
+        user.setFirstName(firstName);
+        user.setLastName(lastName);
+        user.setEmail(email);
+        user.setPassword(password);
+
+        return userRepository.save(user);
     }
 }

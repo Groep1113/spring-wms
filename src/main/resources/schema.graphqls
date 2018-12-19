@@ -50,16 +50,21 @@ type Query {
 
 type Mutation {
     login(email: String!, password: String!): LoginPayload
+
     createItem(name: String!, code: String!, recommendedStock: Int!, locationId: Int!): Item
-    createLocation(code: String!, depth: Int!, width: Int!, height: Int!): Location
-    createCategory(name: String!): Category
+    deleteItem(itemId: Int!): Boolean
     itemChangeLocation(itemId: Int!, locationId: Int!): Item
     itemAddCategory(itemId: Int!, categoryId: Int!): Item
     itemRemoveCategory(itemId: Int!, categoryId: Int!): Item
+
+    createUser(firstName: String!, lastName: String!, email: String!, password: String!): User
+
+    createLocation(code: String!, depth: Int!, width: Int!, height: Int!): Location
+    deleteLocation(locationId: Int!): Boolean
+
+    createCategory(name: String!): Category
+    deleteCategory(categoryId: Int!): Boolean
     categoryChangeName(categoryId: Int!, name: String!): Category
     categoryAddLocation(categoryId: Int!, locationId: Int!): Category
     categoryRemoveLocation(categoryId: Int!, locationId: Int!): Category
-    deleteItem(itemId: Int!): Boolean
-    deleteLocation(locationId: Int!): Boolean
-    deleteCategory(categoryId: Int!): Boolean
 }
