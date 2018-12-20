@@ -1,3 +1,5 @@
+scalar LocalDate
+
 type User {
     id: Int!
     firstName: String!
@@ -36,6 +38,38 @@ type Category {
     locations: [Location]!
 }
 
+type Transaction {
+    id: Int!
+    createdDate: LocalDate!
+    updateDate: LocalDate!
+    deletedDate: LocalDate!
+    receivedDate: LocalDate!
+    locked: Boolean!
+}
+
+type TransactionRule {
+    id: Int!
+    amount: Int!
+    plannedDate: LocalDate!
+    actualDate: LocalDate!
+}
+
+type Account {
+    id: Int!
+    name: String!
+}
+
+type Balance {
+    id: Int!
+    amount: Int!
+}
+
+type BalanceMutation {
+    id: Int!
+    amount: Int!
+    reason: String!
+}
+
 type Query {
     users: [User]!
     userByMail(email: String!): User
@@ -46,6 +80,16 @@ type Query {
 	location(id: Int!): Location
     categories: [Category]!
     category(id: Int!): Category
+    transactions: [Transaction]!
+    transaction(id: Int!): Transaction
+    transactionRules: [TransactionRule]!
+    transactionRule(id: Int!): TransactionRule
+    accounts: [Account]!
+    account(id: Int!): Account
+    balances: [Balance]!
+    balance(id: Int!): Balance
+    balanceMutations: [BalanceMutation]!
+    balanceMutation(id: Int!): BalanceMutation
 }
 
 type Mutation {
