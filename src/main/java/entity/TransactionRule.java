@@ -24,10 +24,14 @@ public class TransactionRule {
     @OneToOne
     private Item item;
 
-    public TransactionRule(@NotNull Integer amount, Transaction transaction, Item item) {
+    public TransactionRule(@NotNull Integer amount, Transaction transaction, Item item, LocalDate plannedDate) {
         this.amount = amount;
         this.transaction = transaction;
         this.item = item;
+        this.plannedDate = plannedDate;
+    }
+
+    public TransactionRule() {
     }
 
     public Integer getId() {

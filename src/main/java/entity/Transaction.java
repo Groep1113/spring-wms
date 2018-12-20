@@ -1,8 +1,10 @@
 package entity;
 
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 public class Transaction {
@@ -30,6 +32,17 @@ public class Transaction {
     @NotNull
     private Boolean locked;
 
+    @OneToMany(mappedBy = "transaction", fetch = FetchType.EAGER)
+    private Set<TransactionRule> transactionRules;
+
+    public Transaction(Account from, Account to) {
+        this.from = from;
+        this.to = to;
+        this.createdDate = LocalDate.now();
+        this.updateDate = LocalDate.now();
+        this.locked = false;
+    }
+
     public Transaction(Account from, Account to, @NotNull LocalDate createdDate, @NotNull LocalDate updateDate, @NotNull Boolean locked) {
         this.from = from;
         this.to = to;
@@ -54,6 +67,7 @@ public class Transaction {
     }
 
     public void setCreatedDate(LocalDate createdDate) {
+        this.updateDate = LocalDate.now();
         this.createdDate = createdDate;
     }
 
@@ -71,6 +85,7 @@ public class Transaction {
 
     public void setDeletedDate(LocalDate deletedDate) {
         this.deletedDate = deletedDate;
+        this.updateDate = LocalDate.now();
     }
 
     public LocalDate getReceivedDate() {
@@ -79,6 +94,7 @@ public class Transaction {
 
     public void setReceivedDate(LocalDate receivedDate) {
         this.receivedDate = receivedDate;
+        this.updateDate = LocalDate.now();
     }
 
     public Boolean getLocked() {
@@ -103,5 +119,13 @@ public class Transaction {
 
     public void setTo(Account to) {
         this.to = to;
+    }
+
+    public Set<TransactionRule> getTransactionRules() {
+        return transactionRules;
+    }
+
+    public void setTransactionRules(Set<TransactionRule> transactionRules) {
+        this.transactionRules = transactionRules;
     }
 }

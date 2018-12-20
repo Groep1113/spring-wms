@@ -2,19 +2,15 @@ package graphql;
 
 import base.TokenManager;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
-import entity.Category;
-import entity.Item;
-import entity.Location;
-import entity.User;
+import entity.*;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.types.LoginPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import repository.CategoryRepository;
-import repository.ItemRepository;
-import repository.LocationRepository;
-import repository.UserRepository;
+import repository.*;
 
+import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -24,16 +20,31 @@ public class Mutation implements GraphQLMutationResolver {
     private ItemRepository itemRepository;
     private LocationRepository locationRepository;
     private CategoryRepository categoryRepository;
+    private TransactionRepository transactionRepository;
+    private TransactionRuleRepository transactionRuleRepository;
+    private AccountRepository accountRepository;
+    private BalanceMutationRepository balanceMutationRepository;
+    private BalanceRepository balanceRepository;
 
     @Autowired
     public Mutation(UserRepository userRepository,
                     ItemRepository itemRepository,
                     LocationRepository locationRepository,
-                    CategoryRepository categoryRepository) {
+                    CategoryRepository categoryRepository,
+                    TransactionRepository transactionRepository,
+                    TransactionRuleRepository transactionRuleRepository,
+                    AccountRepository accountRepository,
+                    BalanceRepository balanceRepository,
+                    BalanceMutationRepository balanceMutationRepository) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
         this.locationRepository = locationRepository;
         this.categoryRepository = categoryRepository;
+        this.transactionRepository = transactionRepository;
+        this.transactionRuleRepository = transactionRuleRepository;
+        this.accountRepository = accountRepository;
+        this.balanceRepository = balanceRepository;
+        this.balanceMutationRepository = balanceMutationRepository;
     }
 
     private String idNotFoundMessage(int id, String entity){
@@ -213,5 +224,111 @@ public class Mutation implements GraphQLMutationResolver {
         user.setPassword(password);
 
         return userRepository.save(user);
+    }
+
+    public Account createAccount(String name, DataFetchingEnvironment env) {
+        Optional<Account> result = accountRepository.findByName(name);
+        if (result.isPresent()) throw new GraphQLException("Account " + name + " already exists.");
+        return accountRepository.save(new Account(name));
+    }
+
+    public Balance createBalance(int itemId, int accountId, Integer amount, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+
+        Item item = itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
+
+        Account account = accountRepository
+                .findById(accountId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(accountId, Account.class.getSimpleName())));
+
+        if (balanceRepository.findByAccountAndItem(account, item).isPresent())
+            throw new GraphQLException("A balance with account (" + account.getName() + ") and item " + item.getName() + " already exists");
+
+        return balanceRepository.save(new Balance(account, item, amount == null ? 0 : amount));
+    }
+
+    public Transaction createReservationTransaction(Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Account fromAccount = accountRepository
+                .findByName(Account.WAREHOUSE)
+                .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)));
+        Account toAccount = accountRepository
+                .findByName(Account.IN_USE)
+                .orElseGet(() -> accountRepository.save(new Account(Account.IN_USE)));
+
+        Transaction transaction = transactionRepository.save(new Transaction(fromAccount, toAccount));
+
+        if (itemId != null && amount != null)
+            addRuleToTransaction(transaction.getId(), itemId, amount, plannedDate, env);
+
+        return transaction;
+    }
+
+    public TransactionRule addRuleToTransaction(Integer transactionId, Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Transaction transaction = transactionRepository
+                .findById(transactionId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionId, Transaction.class.getSimpleName())));
+
+        if (transaction.getLocked()) throw new GraphQLException("This transaction is locked.");
+
+        Item item = itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
+
+        return transactionRuleRepository.save(new TransactionRule(amount, transaction, item, plannedDate == null ? LocalDate.now() : plannedDate));
+    }
+
+    private boolean safeTransactionCheck(Transaction transaction) {
+        Iterable<TransactionRule> transactionRules = transactionRuleRepository.findAllByTransactionId(transaction.getId());
+
+        for (TransactionRule transactionRule:
+                transactionRules) {
+            Item item = transactionRule.getItem();
+            Account fromAccount = transaction.getFrom();
+            Balance balance = balanceRepository
+                    .findByAccountAndItem(fromAccount, item)
+                    .orElseThrow(() -> new GraphQLException("No stock defined for item " + item.getName() + " at " + fromAccount.getName() + "."));
+
+            if (balance.getAmount() < transactionRule.getAmount()) throw new GraphQLException("Not enough stock for item");
+        }
+        return true;
+    }
+
+    private void processBalanceChanges(Transaction transaction) {
+        Iterable<TransactionRule> transactionRules = transactionRuleRepository.findAllByTransactionId(transaction.getId());
+        for (TransactionRule transactionRule:
+                transactionRules) {
+            Account fromAccount = transaction.getFrom();
+            Item item = transactionRule.getItem();
+
+            Balance balance = balanceRepository
+                    .findByAccountAndItem(fromAccount, item)
+                    .orElseThrow(() -> new GraphQLException("No stock defined for item " + item.getName() + " at " + fromAccount.getName() + "."));
+            balance.setAmount(balance.getAmount() + transactionRule.getAmount() * -1);
+            balanceMutationRepository.save(new BalanceMutation(fromAccount, item, transactionRule.getAmount() * -1, "Transaction: " + transaction.getId() + " Rule:" + transactionRule.getId()));
+            balanceRepository.save(balance);
+            transactionRule.setActualDate(LocalDate.now());
+            transactionRuleRepository.save(transactionRule);
+        }
+    }
+
+    public Transaction executeTransaction(int transactionId, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Transaction transaction = transactionRepository
+                .findById(transactionId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionId, Transaction.class.getSimpleName())));
+
+        if (safeTransactionCheck(transaction)) processBalanceChanges(transaction);
+
+        transaction.setReceivedDate(LocalDate.now());
+        transaction.setLocked(true);
+        return transactionRepository.save(transaction);
     }
 }
