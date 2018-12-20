@@ -2,21 +2,18 @@ package graphql;
 
 import base.TokenManager;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
-import entity.Category;
-import entity.Item;
-import entity.Location;
-import entity.User;
+import entity.*;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.types.LoginPayload;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import repository.CategoryRepository;
-import repository.ItemRepository;
-import repository.LocationRepository;
-import repository.UserRepository;
+import repository.*;
 
+import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
+@SuppressWarnings("unused")
 @Component
 public class Mutation implements GraphQLMutationResolver {
 
@@ -24,20 +21,27 @@ public class Mutation implements GraphQLMutationResolver {
     private ItemRepository itemRepository;
     private LocationRepository locationRepository;
     private CategoryRepository categoryRepository;
+    private RoleRepository roleRepository;
 
     @Autowired
     public Mutation(UserRepository userRepository,
                     ItemRepository itemRepository,
                     LocationRepository locationRepository,
-                    CategoryRepository categoryRepository) {
+                    CategoryRepository categoryRepository,
+                    RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
         this.locationRepository = locationRepository;
         this.categoryRepository = categoryRepository;
+        this.roleRepository = roleRepository;
     }
 
     private String idNotFoundMessage(int id, String entity){
         return "No " + entity.toLowerCase() + " found with id " + id + ".";
+    }
+
+    private void throwIdNotFound(int id, String className) {
+        throw new GraphQLException(idNotFoundMessage(id, className));
     }
 
     public LoginPayload login(String email, String password) {
@@ -67,7 +71,7 @@ public class Mutation implements GraphQLMutationResolver {
 
     public Location createLocation(String code, int depth, int width, int height, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
-        
+
         return locationRepository.save(new Location(code, depth, width, height));
     }
 
@@ -211,6 +215,35 @@ public class Mutation implements GraphQLMutationResolver {
         user.setLastName(lastName);
         user.setEmail(email);
         user.setPassword(password);
+
+        return userRepository.save(user);
+    }
+
+    public User addRole(int userId, int roleId, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Optional<User> optUser = userRepository.findById(userId);
+        if (!optUser.isPresent()) throwIdNotFound(userId, User.class.getSimpleName());
+        Optional<Role> optRole = roleRepository.findById(roleId);
+        if (!optRole.isPresent()) throwIdNotFound(roleId, Role.class.getSimpleName());
+
+        User user = optUser.get();
+        Role role = optRole.get();
+        user.addRole(role);
+        return userRepository.save(user);
+    }
+
+    public User removeRole(int userId, int roleId, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Optional<User> optUser = userRepository.findById(userId);
+        if (!optUser.isPresent()) throwIdNotFound(userId, User.class.getSimpleName());
+        Optional<Role> optRole = roleRepository.findById(roleId);
+        if (!optRole.isPresent()) throwIdNotFound(roleId, Role.class.getSimpleName());
+
+        User user = optUser.get();
+        Role role = optRole.get();
+        user.removeRole(role);
 
         return userRepository.save(user);
     }

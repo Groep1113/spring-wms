@@ -1,8 +1,15 @@
+type Role {
+    id: Int!
+    name: String!
+    users: [User]!
+}
+
 type User {
     id: Int!
     firstName: String!
     lastName: String!
     email: String!
+    roles: [Role]!
 }
 
 type LoginPayload {
@@ -58,6 +65,8 @@ type Mutation {
     itemRemoveCategory(itemId: Int!, categoryId: Int!): Item
 
     createUser(firstName: String!, lastName: String!, email: String!, password: String!): User
+    addRole(userId: Int!, roleId: Int!): User
+    removeRole(userId: Int!, roleId: Int!): User
 
     createLocation(code: String!, depth: Int!, width: Int!, height: Int!): Location
     deleteLocation(locationId: Int!): Boolean
