@@ -1,8 +1,6 @@
 package entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
@@ -20,11 +18,16 @@ public class TransactionRule {
 
     private LocalDate actualDate;
 
-    public TransactionRule(@NotNull Integer amount) {
-        this.amount = amount;
-    }
+    @ManyToOne
+    private Transaction transaction;
 
-    public TransactionRule() {
+    @OneToOne
+    private Item item;
+
+    public TransactionRule(@NotNull Integer amount, Transaction transaction, Item item) {
+        this.amount = amount;
+        this.transaction = transaction;
+        this.item = item;
     }
 
     public Integer getId() {
@@ -57,5 +60,21 @@ public class TransactionRule {
 
     public void setActualDate(LocalDate actualDate) {
         this.actualDate = actualDate;
+    }
+
+    public Transaction getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
+    }
+
+    public Item getItem() {
+        return item;
+    }
+
+    public void setItem(Item item) {
+        this.item = item;
     }
 }
