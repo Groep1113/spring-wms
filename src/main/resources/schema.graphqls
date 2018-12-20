@@ -40,6 +40,7 @@ type Category {
 
 type Transaction {
     id: Int!
+    from: Account!
     createdDate: LocalDate!
     updateDate: LocalDate!
     deletedDate: LocalDate!
@@ -52,6 +53,8 @@ type TransactionRule {
     amount: Int!
     plannedDate: LocalDate!
     actualDate: LocalDate!
+    transaction: Transaction!
+    item: Item!
 }
 
 type Account {

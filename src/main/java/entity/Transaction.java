@@ -11,6 +11,12 @@ public class Transaction {
     @GeneratedValue
     private Integer id;
 
+    @ManyToOne
+    private Account from;
+
+    @ManyToOne
+    private Account to;
+
     @NotNull
     private LocalDate createdDate;
 
@@ -24,7 +30,9 @@ public class Transaction {
     @NotNull
     private Boolean locked;
 
-    public Transaction(@NotNull LocalDate createdDate, @NotNull LocalDate updateDate, @NotNull Boolean locked) {
+    public Transaction(Account from, Account to, @NotNull LocalDate createdDate, @NotNull LocalDate updateDate, @NotNull Boolean locked) {
+        this.from = from;
+        this.to = to;
         this.createdDate = createdDate;
         this.updateDate = updateDate;
         this.locked = locked;
@@ -79,5 +87,21 @@ public class Transaction {
 
     public void setLocked(Boolean locked) {
         this.locked = locked;
+    }
+
+    public Account getFrom() {
+        return from;
+    }
+
+    public void setFrom(Account from) {
+        this.from = from;
+    }
+
+    public Account getTo() {
+        return to;
+    }
+
+    public void setTo(Account to) {
+        this.to = to;
     }
 }
