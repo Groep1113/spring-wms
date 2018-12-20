@@ -1,22 +1,26 @@
 package entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 
 @Entity
 public class Account {
 
+    public static final String WAREHOUSE = "Warehouse";
+    public static final String IN_USE = "In use";
+
     @Id
     @GeneratedValue
     private Integer id;
 
-    @NotNull
+    @Column(nullable = false, unique = true)
     private String name;
 
     public Account(@NotNull String name) {
         this.name = name;
+    }
+
+    public Account() {
     }
 
     public Integer getId() {

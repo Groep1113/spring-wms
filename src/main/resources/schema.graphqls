@@ -41,11 +41,13 @@ type Category {
 type Transaction {
     id: Int!
     from: Account!
+    to: Account!
     createdDate: LocalDate!
     updateDate: LocalDate!
-    deletedDate: LocalDate!
-    receivedDate: LocalDate!
+    deletedDate: LocalDate
+    receivedDate: LocalDate
     locked: Boolean!
+    transactionRules: [TransactionRule]!
 }
 
 type TransactionRule {
@@ -65,6 +67,8 @@ type Account {
 type Balance {
     id: Int!
     amount: Int!
+    item: Item!
+    account: Account!
 }
 
 type BalanceMutation {
@@ -114,4 +118,10 @@ type Mutation {
     categoryChangeName(categoryId: Int!, name: String!): Category
     categoryAddLocation(categoryId: Int!, locationId: Int!): Category
     categoryRemoveLocation(categoryId: Int!, locationId: Int!): Category
+
+    createAccount(name: String!): Account
+    createBalance(itemId: Int!, acountId: Int!, amount: Int): Balance
+    createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
+    addRuleToTransaction(transactionId: Int!, itemId: Int!, amount: Int!, plannedDate: LocalDate): TransactionRule
+    executeTransaction(transactionId: Int!): Transaction
 }

@@ -62,4 +62,8 @@ public class Balance {
     public void setItem(Item item) {
         this.item = item;
     }
+
+    public void add(int additionValue) {
+        amount = amount + additionValue;
+    }
 }
