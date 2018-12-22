@@ -119,10 +119,14 @@ type Mutation {
     categoryAddLocation(categoryId: Int!, locationId: Int!): Category
     categoryRemoveLocation(categoryId: Int!, locationId: Int!): Category
 
-    createAccount(name: String!): Account
+    createWarehouseAccount(): Account
+    createInUseAccount(): Account
     createBalance(itemId: Int!, acountId: Int!, amount: Int): Balance
     createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
+    createReturnTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
     addRuleToTransaction(transactionId: Int!, itemId: Int!, amount: Int!, plannedDate: LocalDate): TransactionRule
+    changeTransactionRule(transactionRuleId: Int!, itemId: Int, amount: Int, plannedDate, LocalDate): TransactionRule
     executeTransaction(transactionId: Int!): Transaction
     deleteTransaction(transactionId: Int!): Boolean
+    deleteTransactionRule(transactionRuleId: Int!): Boolean
 }
