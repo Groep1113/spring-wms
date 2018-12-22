@@ -37,6 +37,8 @@ public class Transaction {
     @OneToMany(mappedBy = "transaction", fetch = FetchType.EAGER)
     private Set<TransactionRule> transactionRules;
 
+    private static final String LOCKED_MESSAGE = "Transaction is locked and therefore, no changes can be made.";
+
     public Transaction(Account from, Account to) {
         this.from = from;
         this.to = to;
@@ -69,7 +71,7 @@ public class Transaction {
     }
 
     public void setCreatedDate(LocalDate createdDate) {
-        if (this.locked) throw new GraphQLException("Transaction is locked and therefore, no changes can be made.");
+        if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
         this.updateDate = LocalDate.now();
         this.createdDate = createdDate;
     }
@@ -79,7 +81,7 @@ public class Transaction {
     }
 
     public void setUpdateDate(LocalDate updateDate) {
-        if (this.locked) throw new GraphQLException("Transaction is locked and therefore, no changes can be made.");
+        if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
         this.updateDate = updateDate;
     }
 
@@ -88,7 +90,6 @@ public class Transaction {
     }
 
     public void setDeletedDate(LocalDate deletedDate) {
-        if (this.locked) throw new GraphQLException("Transaction is locked and therefore, no changes can be made.");
         this.deletedDate = deletedDate;
         this.updateDate = LocalDate.now();
     }
@@ -98,7 +99,7 @@ public class Transaction {
     }
 
     public void setReceivedDate(LocalDate receivedDate) {
-        if (this.locked) throw new GraphQLException("Transaction is locked and therefore, no changes can be made.");
+        if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
         this.receivedDate = receivedDate;
         this.updateDate = LocalDate.now();
     }
@@ -116,7 +117,7 @@ public class Transaction {
     }
 
     public void setFrom(Account from) {
-        if (this.locked) throw new GraphQLException("Transaction is locked and therefore, no changes can be made.");
+        if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
         this.from = from;
     }
 
@@ -125,7 +126,7 @@ public class Transaction {
     }
 
     public void setTo(Account to) {
-        if (this.locked) throw new GraphQLException("Transaction is locked and therefore, no changes can be made.");
+        if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
         this.to = to;
     }
 
