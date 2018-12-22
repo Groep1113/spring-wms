@@ -227,6 +227,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Account createAccount(String name, DataFetchingEnvironment env) {
+        //TODO: Zorg dat 'name' altijd overeen moet komen met een van de constantes
         Optional<Account> result = accountRepository.findByName(name);
         if (result.isPresent()) throw new GraphQLException("Account " + name + " already exists.");
         return accountRepository.save(new Account(name));
@@ -266,6 +267,20 @@ public class Mutation implements GraphQLMutationResolver {
             addRuleToTransaction(transaction.getId(), itemId, amount, plannedDate, env);
 
         return transaction;
+    }
+
+    public Boolean deleteTransaction(Integer transactionId, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Transaction transaction = transactionRepository
+                .findById(transactionId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionId, Transaction.class.getSimpleName())));
+
+        if (transaction.getDeletedDate() != null)
+            throw new GraphQLException("This transaction was already deleted on " + transaction.getDeletedDate() + ".");
+        transaction.setDeletedDate(LocalDate.now());
+
+        return true;
     }
 
     public TransactionRule addRuleToTransaction(Integer transactionId, Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env) {
@@ -324,6 +339,9 @@ public class Mutation implements GraphQLMutationResolver {
         Transaction transaction = transactionRepository
                 .findById(transactionId)
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionId, Transaction.class.getSimpleName())));
+
+        if (transaction.getDeletedDate() != null)
+            throw new GraphQLException("This transaction has been deleted, and therefore, can not be executed.");
 
         if (safeTransactionCheck(transaction)) processBalanceChanges(transaction);
 

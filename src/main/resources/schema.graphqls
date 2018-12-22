@@ -124,4 +124,5 @@ type Mutation {
     createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
     addRuleToTransaction(transactionId: Int!, itemId: Int!, amount: Int!, plannedDate: LocalDate): TransactionRule
     executeTransaction(transactionId: Int!): Transaction
+    deleteTransaction(transactionId: Int!): Boolean
 }
