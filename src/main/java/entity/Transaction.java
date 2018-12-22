@@ -1,6 +1,8 @@
 package entity;
 
 
+import graphql.GraphQLException;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -67,6 +69,7 @@ public class Transaction {
     }
 
     public void setCreatedDate(LocalDate createdDate) {
+        if (this.locked) throw new GraphQLException("Transaction is locked and therefore, no changes can be made.");
         this.updateDate = LocalDate.now();
         this.createdDate = createdDate;
     }
@@ -76,6 +79,7 @@ public class Transaction {
     }
 
     public void setUpdateDate(LocalDate updateDate) {
+        if (this.locked) throw new GraphQLException("Transaction is locked and therefore, no changes can be made.");
         this.updateDate = updateDate;
     }
 
@@ -84,6 +88,7 @@ public class Transaction {
     }
 
     public void setDeletedDate(LocalDate deletedDate) {
+        if (this.locked) throw new GraphQLException("Transaction is locked and therefore, no changes can be made.");
         this.deletedDate = deletedDate;
         this.updateDate = LocalDate.now();
     }
@@ -93,6 +98,7 @@ public class Transaction {
     }
 
     public void setReceivedDate(LocalDate receivedDate) {
+        if (this.locked) throw new GraphQLException("Transaction is locked and therefore, no changes can be made.");
         this.receivedDate = receivedDate;
         this.updateDate = LocalDate.now();
     }
@@ -110,6 +116,7 @@ public class Transaction {
     }
 
     public void setFrom(Account from) {
+        if (this.locked) throw new GraphQLException("Transaction is locked and therefore, no changes can be made.");
         this.from = from;
     }
 
@@ -118,6 +125,7 @@ public class Transaction {
     }
 
     public void setTo(Account to) {
+        if (this.locked) throw new GraphQLException("Transaction is locked and therefore, no changes can be made.");
         this.to = to;
     }
 
