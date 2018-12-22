@@ -228,10 +228,14 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Account createWarehouseAccount(DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
         return createAccount(Account.WAREHOUSE);
     }
 
     public Account createInUseAccount(DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
         return createAccount(Account.IN_USE);
     }
 
@@ -241,7 +245,7 @@ public class Mutation implements GraphQLMutationResolver {
         return accountRepository.save(new Account(name));
     }
 
-    public Balance createBalance(int itemId, int accountId, Integer amount, DataFetchingEnvironment env) {
+    public Balance createBalance(int itemId, Integer accountId, Integer amount, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
 
@@ -249,14 +253,45 @@ public class Mutation implements GraphQLMutationResolver {
                 .findById(itemId)
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
 
-        Account account = accountRepository
-                .findById(accountId)
-                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(accountId, Account.class.getSimpleName())));
+        Account account;
+        if (accountId == null)
+            account = accountRepository
+                    .findByName(Account.WAREHOUSE)
+                    .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)));
+        else
+            account = accountRepository
+                    .findById(accountId)
+                    .orElseThrow(() -> new GraphQLException(idNotFoundMessage(accountId, Account.class.getSimpleName())));
 
         if (balanceRepository.findByAccountAndItem(account, item).isPresent())
             throw new GraphQLException("A balance with account (" + account.getName() + ") and item " + item.getName() + " already exists");
 
         return balanceRepository.save(new Balance(account, item, amount == null ? 0 : amount));
+    }
+
+    public Balance setBalance(Integer balanceId, Integer amount, String reason, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Balance balance = balanceRepository
+                .findById(balanceId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(balanceId, Balance.class.getSimpleName())));
+
+        int mutationAmount;
+        if (amount < balance.getAmount())
+            mutationAmount = balance.getAmount() - amount;
+        else
+            mutationAmount = amount - balance.getAmount();
+
+        balanceMutationRepository
+                .save(new BalanceMutation(
+                        balance.getAccount(),
+                        balance.getItem(),
+                        mutationAmount,
+                        reason == null ? "Manual balance mutation. No reason given." : reason));
+
+        balance.setAmount(amount);
+
+        return balance;
     }
 
     public Transaction createReservationTransaction(Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env) {
@@ -299,7 +334,7 @@ public class Mutation implements GraphQLMutationResolver {
         return transaction;
     }
 
-    public Boolean deleteTransaction(Integer transactionId, DataFetchingEnvironment env) {
+    public Transaction deleteTransaction(Integer transactionId, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
         Transaction transaction = transactionRepository
@@ -310,7 +345,7 @@ public class Mutation implements GraphQLMutationResolver {
             throw new GraphQLException("This transaction was already deleted on " + transaction.getDeletedDate() + ".");
         transaction.setDeletedDate(LocalDate.now());
 
-        return true;
+        return transactionRepository.save(transaction);
     }
 
     public Transaction changeTransaction(Integer transactionId, Integer fromAccountId, Integer toAccountId, DataFetchingEnvironment env) {
@@ -376,7 +411,7 @@ public class Mutation implements GraphQLMutationResolver {
         return true;
     }
 
-    private boolean safeTransactionCheck(Transaction transaction) {
+    private void safeTransactionCheck(Transaction transaction) {
         Iterable<TransactionRule> transactionRules = transactionRuleRepository.findAllByTransactionId(transaction.getId());
 
         for (TransactionRule transactionRule:
@@ -389,7 +424,10 @@ public class Mutation implements GraphQLMutationResolver {
 
             if (balance.getAmount() < transactionRule.getAmount()) throw new GraphQLException("Not enough stock for item");
         }
-        return true;
+    }
+
+    private Supplier<GraphQLException> noStockDefined(Account account, Item item){
+        return () -> new GraphQLException("No stock defined for item " + item.getName() + " at " + account.getName() + ".");
     }
 
     private void processBalanceChanges(Transaction transaction) {
@@ -401,23 +439,25 @@ public class Mutation implements GraphQLMutationResolver {
             Account fromAccount = transaction.getFrom();
             Account toAccount = transaction.getTo();
 
-            final Supplier<GraphQLException> noStockDefined = () -> new GraphQLException("No stock defined for item " + item.getName() + " at " + fromAccount.getName() + ".");
-            Balance fromBalance = balanceRepository
-                    .findByAccountAndItem(fromAccount, item)
-                    .orElseThrow(noStockDefined);
+            if (fromAccount.getName().equals(Account.WAREHOUSE)) {
+                Balance fromBalance = balanceRepository
+                        .findByAccountAndItem(fromAccount, item)
+                        .orElseThrow(noStockDefined(fromAccount, item));
 
-            Balance toBalance = balanceRepository
-                    .findByAccountAndItem(toAccount, item)
-                    .orElseThrow(noStockDefined);
+                fromBalance.setAmount(fromBalance.getAmount() + transactionRule.getAmount() * -1);
+                balanceMutationRepository.save(new BalanceMutation(fromAccount, item, transactionRule.getAmount() * -1, "Transaction: " + transaction.getId() + ", Rule: " + transactionRule.getId()));
+                balanceRepository.save(fromBalance);
+            }
 
+            if (toAccount.getName().equals(Account.WAREHOUSE)) {
+                Balance toBalance = balanceRepository
+                        .findByAccountAndItem(toAccount, item)
+                        .orElseThrow(noStockDefined(toAccount, item));
 
-            fromBalance.setAmount(fromBalance.getAmount() + transactionRule.getAmount() * -1);
-            balanceMutationRepository.save(new BalanceMutation(fromAccount, item, transactionRule.getAmount() * -1, "Transaction: " + transaction.getId() + " Rule:" + transactionRule.getId()));
-            balanceRepository.save(fromBalance);
-
-            toBalance.setAmount(toBalance.getAmount() + transactionRule.getAmount());
-            balanceMutationRepository.save(new BalanceMutation(toAccount, item, transactionRule.getAmount() * -1, "Transaction: " + transaction.getId() + " Rule:" + transactionRule.getId()));
-            balanceRepository.save(toBalance);
+                toBalance.setAmount(toBalance.getAmount() + transactionRule.getAmount());
+                balanceMutationRepository.save(new BalanceMutation(toAccount, item, transactionRule.getAmount() * -1, "Transaction: " + transaction.getId() + ", Rule: " + transactionRule.getId()));
+                balanceRepository.save(toBalance);
+            }
 
             transactionRule.setActualDate(LocalDate.now());
             transactionRuleRepository.save(transactionRule);
@@ -434,7 +474,8 @@ public class Mutation implements GraphQLMutationResolver {
         if (transaction.getDeletedDate() != null)
             throw new GraphQLException("This transaction has been deleted, and therefore, can not be executed.");
 
-        if (safeTransactionCheck(transaction)) processBalanceChanges(transaction);
+        safeTransactionCheck(transaction);
+        processBalanceChanges(transaction);
 
         transaction.setReceivedDate(LocalDate.now());
         transaction.setLocked(true);
