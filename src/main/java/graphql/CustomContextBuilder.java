@@ -42,7 +42,7 @@ public class CustomContextBuilder implements GraphQLContextBuilder {
         if (header == null || !header.startsWith("Bearer ")) {
             // This if statement makes it so that during local development
             // we can use a cookie tagged as `token`
-            if (inLocalDevContext(request) && request.getCookies() != null) {
+            if (request.getCookies() != null) {
                 String token = getTokenFromCookies(request.getCookies());
                 if (token == null) return new AuthContext(null, request, response);
 

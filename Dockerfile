@@ -1,9 +1,6 @@
-FROM openjdk:10-jre-slim as productionstage
-COPY src src
-COPY build.gradle .
-COPY settings.gradle .
-COPY application.properties .
-COPY gradlew .
-COPY gradle gradle
-RUN ["./gradlew", "build"]
-ENTRYPOINT ["./gradlew", "bootRun"]
+FROM openjdk:8-jdk-alpine
+VOLUME /tmp
+ADD build/libs/htg-it-wms-0.1.0.jar app.jar
+COPY application-dev.properties .
+ENV JAVA_OPTS=""
+ENTRYPOINT ["java", "-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=dev","-jar","app.jar"]
