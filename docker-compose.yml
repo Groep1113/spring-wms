@@ -1,17 +1,12 @@
 version: "3"
 services:
   spring:
-    image: lalleball/spring-wms
-    restart: always
+    image: lalleball/spring
     ports:
       - "9000:9000"
     networks:
       - backend
-    links:
-      - "mysql:database"
-    depends_on:
-      - "mysql"
-  mysql:
+  database:
     image: mysql:latest
     ports:
       - "3306:3306"
