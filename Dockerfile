@@ -5,4 +5,4 @@ COPY wait-for-it.sh .
 COPY application-dev.properties .
 RUN ["chmod", "+x", "./wait-for-it.sh"]
 EXPOSE 9000
-ENTRYPOINT ["./wait-for-it.sh", "database:3306", "--", "java", "-Djava.security.egd=file:/dev/./urandom","-Dspring.profiles.active=dev","-jar","app.jar"]
+ENTRYPOINT ./wait-for-it.sh $DATABASE_HOST:$DATABASE_PORT -t 30 -- java -Djava.security.egd=file:/dev/./urandom -Dspring.profiles.active=dev -jar app.jar
