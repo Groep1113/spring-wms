@@ -2,8 +2,6 @@ version: "3"
 services:
   spring:
     image: lalleball/spring
-    ports:
-      - "9000:9000"
     environment:
       DATABASE_HOST: ${DATABASE_HOST}
       DATABASE_PORT: ${DATABASE_PORT}
@@ -11,6 +9,12 @@ services:
       DATABASE_USER: ${DATABASE_USER}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD}
       SPRING_PORT: ${SPRING_PORT}
+    networks:
+      - backend
+  proxy:
+    image: lalleball/proxy
+    ports:
+      - "9000:9001"
     networks:
       - backend
   database:
@@ -24,5 +28,9 @@ services:
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
     networks:
       - backend
+  react:
+    image: lalleball/react
+    ports:
+      - "80:80"
 networks:
   backend:
