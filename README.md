@@ -55,19 +55,20 @@ Om een goeie authenticatie flow te realiseren is het voor bijbehorende frontend 
   * Roep eerst de login mutatie aan, en sla zodra je een valide token terugkrijgt deze lokaal op
   * Voeg vervolgens bij alle vervolg requests de `Authorization` header toe met een waarde: `Bearer tokenHere`
   
-### Docker 101
-Als je de applicatie wil starten via Docker dan kan je daarvoor de volgende stappen uitvoeren vanuit de project root:
-- Bouw de image:
-```bash
-docker build -t htg/spring-wms .
-```
-- Start de container:
-```bash
-docker run --name spring-wms -p 8080:8080 -t htg/spring-wms
-```
-Je kan de container op een andere poort laten luisteren door de waarde links van de ':' te veranderen. Rechts van de ':' is de poort die je hebt ingesteld in je `application.properties`.
+### Docker
+Voordat je met Docker de applicatie kan starten, moet je eenmalig het volgende doen:
+- Maak een bestand aan in de project root genaamd `.env`.
+- Kopieer de inhoud van `.env.example` naar `.env`.
+- Vul de gegevens vervolgens aan in `.env` naar eigen keuze, zoals wachtwoord, username en databasenaam.
 
-- Stop en verwijder de container (niet de image):
+Daarna kan je met [ Docker Compose ](https://docs.docker.com/compose/install/) de applicatie starten.
 ```bash
-docker rm -f spring-wms
+docker-compose up
 ```
+
+Om alles weer correct af te sluiten.
+```bash
+docker-compose down
+```
+
+De applicatie gebruikt vanuit Docker de poorten 3306, 8080 en 9000. Zorg dat je deze poorten vrij hebt voor je het opstart.
