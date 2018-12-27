@@ -1,7 +1,7 @@
 version: "3"
 services:
   spring:
-    image: lalleball/spring
+    image: groep1113/spring
     environment:
       DATABASE_HOST: ${DATABASE_HOST}
       DATABASE_PORT: ${DATABASE_PORT}
@@ -12,7 +12,7 @@ services:
     networks:
       - backend
   proxy:
-    image: lalleball/proxy
+    image: groep1113/proxy
     ports:
       - "9000:9001"
     networks:
@@ -29,7 +29,7 @@ services:
     networks:
       - backend
   react:
-    image: lalleball/react
+    image: groep1113/react
     ports:
       - "80:80"
 networks:
