@@ -1,0 +1,36 @@
+version: "3"
+services:
+  spring:
+    image: groep1113/spring
+    environment:
+      DATABASE_HOST: ${DATABASE_HOST}
+      DATABASE_PORT: ${DATABASE_PORT}
+      DATABASE_SCHEMA: ${DATABASE_SCHEMA}
+      DATABASE_USER: ${DATABASE_USER}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD}
+      SPRING_PORT: ${SPRING_PORT}
+    networks:
+      - backend
+  proxy:
+    image: groep1113/proxy
+    ports:
+      - "9000:9001"
+    networks:
+      - backend
+  database:
+    image: mysql:latest
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DATABASE_ROOT_PASSWORD} # niet voor productie
+      MYSQL_DATABASE: ${DATABASE_SCHEMA}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
+    networks:
+      - backend
+  react:
+    image: groep1113/react
+    ports:
+      - "80:80"
+networks:
+  backend:

@@ -4,6 +4,8 @@ type Role {
     users: [User]!
 }
 
+scalar LocalDate
+
 type User {
     id: Int!
     firstName: String!
@@ -43,6 +45,47 @@ type Category {
     locations: [Location]!
 }
 
+type Transaction {
+    id: Int!
+    from: Account!
+    to: Account!
+    createdDate: LocalDate!
+    updateDate: LocalDate!
+    deletedDate: LocalDate
+    receivedDate: LocalDate
+    locked: Boolean!
+    transactionRules: [TransactionRule]!
+}
+
+type TransactionRule {
+    id: Int!
+    amount: Int!
+    plannedDate: LocalDate!
+    actualDate: LocalDate!
+    transaction: Transaction!
+    item: Item!
+}
+
+type Account {
+    id: Int!
+    name: String!
+}
+
+type Balance {
+    id: Int!
+    amount: Int!
+    item: Item!
+    account: Account!
+}
+
+type BalanceMutation {
+    id: Int!
+    item: Item!
+    account: Account!
+    amount: Int!
+    reason: String!
+}
+
 type Query {
     users: [User]!
     userByMail(email: String!): User
@@ -53,6 +96,16 @@ type Query {
 	location(id: Int!): Location
     categories: [Category]!
     category(id: Int!): Category
+    transactions: [Transaction]!
+    transaction(id: Int!): Transaction
+    transactionRules: [TransactionRule]!
+    transactionRule(id: Int!): TransactionRule
+    accounts: [Account]!
+    account(id: Int!): Account
+    balances: [Balance]!
+    balance(id: Int!): Balance
+    balanceMutations: [BalanceMutation]!
+    balanceMutation(id: Int!): BalanceMutation
 }
 
 type Mutation {
@@ -76,4 +129,40 @@ type Mutation {
     categoryChangeName(categoryId: Int!, name: String!): Category
     categoryAddLocation(categoryId: Int!, locationId: Int!): Category
     categoryRemoveLocation(categoryId: Int!, locationId: Int!): Category
+
+    # Creates an account that keeps track of balances in the warehouse.
+    createWarehouseAccount: Account
+
+    # Creates an account representing the in-use items. Not keeping track of items outside of the warehouse because it is out-of-scope.
+    createInUseAccount: Account
+
+    # Every item in the warehouse needs a balance to see how much of it is in stock. Default account is warehouse.
+    createBalance(itemId: Int!, acountId: Int, amount: Int): Balance
+
+    # Sets the balance to given amount. Creates a balance mutation along with a default reason, if not specified.
+    setBalance(balanceId: Int!, amount: Int!, reason: String): Balance
+
+    # Transaction that takes items out of the warehouse. Adding a rule is optional.
+    createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
+
+    # Transaction that takes items into the warehouse. Adding a rule is optional.
+    createReturnTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
+
+    # Adds rule to transaction. Default planned date is today.
+    addRuleToTransaction(transactionId: Int!, itemId: Int!, amount: Int!, plannedDate: LocalDate): TransactionRule
+
+    # Allows you to change properties of the transaction rule.
+    changeTransactionRule(transactionRuleId: Int!, itemId: Int, amount: Int, plannedDate: LocalDate): TransactionRule
+
+    # Allows you to change sending- and/or receiving account of transaction.
+    changeTransaction(transactionId: Int!, fromAccountId: Int, toAccountId: Int): Transaction
+
+    # Updates the balances and locks the transaction. Also checks if stock wont go below zero before executing.
+    executeTransaction(transactionId: Int!): Transaction
+
+    # Fake delete action. It only sets the date_deleted to the current day and locks the transaction.
+    deleteTransaction(transactionId: Int!): Transaction
+
+    # Deletes transaction rule, ignoring lock.
+    deleteTransactionRule(transactionRuleId: Int!): Boolean
 }
