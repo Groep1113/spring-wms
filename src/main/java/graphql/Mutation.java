@@ -191,6 +191,9 @@ public class Mutation implements GraphQLMutationResolver {
     public Boolean deleteItem(int id, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
+        if (transactionRuleRepository.findAllByItemId(id).iterator().hasNext())
+            throw new GraphQLException("Cant delete item, because it is being referenced by transaction");
+        
         itemRepository.delete(itemRepository
                 .findById(id)
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, Item.class.getSimpleName()))));
