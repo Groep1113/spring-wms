@@ -106,7 +106,8 @@ type Mutation {
 
     createItem(name: String!, code: String!, recommendedStock: Int!, locationId: Int!): Item
     deleteItem(itemId: Int!): Boolean
-    itemChangeLocation(itemId: Int!, locationId: Int!): Item
+    itemAddLocation(itemId: Int!, locationId: Int!): Item
+    itemRemoveLocation(itemId: Int!, locationId: Int!): Item
     itemAddCategory(itemId: Int!, categoryId: Int!): Item
     itemRemoveCategory(itemId: Int!, categoryId: Int!): Item
 

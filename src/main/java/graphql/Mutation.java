@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import repository.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -89,7 +90,7 @@ public class Mutation implements GraphQLMutationResolver {
         return categoryRepository.save(new Category(name));
     }
 
-    public Item itemChangeLocation(int itemId, int locationId, DataFetchingEnvironment env) {
+    public Item itemAddLocation(int itemId, int locationId, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
         Item item = itemRepository
@@ -102,6 +103,25 @@ public class Mutation implements GraphQLMutationResolver {
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
 
         locations.add(location);
+        return itemRepository.save(item);
+    }
+
+    public Item itemRemoveLocation(int itemId, int locationId, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Item item = itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
+        Set<Location> locations = item.getLocations();
+
+        Location location = null;
+
+        for (Location loc: locations) {
+            if (loc.getId() == locationId) location = loc;
+        }
+
+        if (location != null) locations.remove(location);
+        else { throw new GraphQLException("Item does not belong to this location."); }
         return itemRepository.save(item);
     }
 
