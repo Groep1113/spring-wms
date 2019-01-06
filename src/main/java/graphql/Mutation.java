@@ -262,6 +262,12 @@ public class Mutation implements GraphQLMutationResolver {
         return createAccount(Account.IN_USE);
     }
 
+    public Account createSupplierAccount(DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return createAccount(Account.IN_USE);
+    }
+
     private Account createAccount(String name) {
         Optional<Account> result = accountRepository.findByName(name);
         if (result.isPresent()) throw new GraphQLException("Account " + name + " already exists.");
@@ -326,6 +332,23 @@ public class Mutation implements GraphQLMutationResolver {
         Account toAccount = accountRepository
                 .findByName(Account.IN_USE)
                 .orElseGet(() -> accountRepository.save(new Account(Account.IN_USE)));
+
+
+        if (itemId != null && amount != null)
+            return createTransactionWithRule(itemId, amount, plannedDate, env, fromAccount, toAccount);
+
+        return transactionRepository.save(new Transaction(fromAccount, toAccount));
+    }
+
+    public Transaction createOrderTransaction(Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Account fromAccount = accountRepository
+                .findByName(Account.SUPPLIER)
+                .orElseGet(() -> accountRepository.save(new Account(Account.SUPPLIER)));
+        Account toAccount = accountRepository
+                .findByName(Account.WAREHOUSE)
+                .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)));
 
 
         if (itemId != null && amount != null)
@@ -441,11 +464,12 @@ public class Mutation implements GraphQLMutationResolver {
                 transactionRules) {
             Item item = transactionRule.getItem();
             Account fromAccount = transaction.getFrom();
-            Balance balance = balanceRepository
-                    .findByAccountAndItem(fromAccount, item)
-                    .orElseThrow(() -> new GraphQLException("No stock defined for item " + item.getName() + " at " + fromAccount.getName() + "."));
-
-            if (balance.getAmount() < transactionRule.getAmount()) throw new GraphQLException("Not enough stock for item");
+            if (fromAccount.getName().equals(Account.WAREHOUSE)) {
+                Balance balance = balanceRepository
+                        .findByAccountAndItem(fromAccount, item)
+                        .orElseThrow(noStockDefined(fromAccount, item));
+                if (balance.getAmount() < transactionRule.getAmount()) throw new GraphQLException("Not enough stock for item");
+            }
         }
     }
 
@@ -468,7 +492,7 @@ public class Mutation implements GraphQLMutationResolver {
                         .orElseThrow(noStockDefined(fromAccount, item));
 
                 fromBalance.setAmount(fromBalance.getAmount() + transactionRule.getAmount() * -1);
-                balanceMutationRepository.save(new BalanceMutation(fromAccount, item, transactionRule.getAmount() * -1, "Transaction: " + transaction.getId() + ", Rule: " + transactionRule.getId()));
+                balanceMutationRepository.save(new BalanceMutation(fromAccount, item, transactionRule.getAmount(), "Transaction: " + transaction.getId() + ", Rule: " + transactionRule.getId()));
                 balanceRepository.save(fromBalance);
             }
 
@@ -478,7 +502,7 @@ public class Mutation implements GraphQLMutationResolver {
                         .orElseThrow(noStockDefined(toAccount, item));
 
                 toBalance.setAmount(toBalance.getAmount() + transactionRule.getAmount());
-                balanceMutationRepository.save(new BalanceMutation(toAccount, item, transactionRule.getAmount() * -1, "Transaction: " + transaction.getId() + ", Rule: " + transactionRule.getId()));
+                balanceMutationRepository.save(new BalanceMutation(toAccount, item, transactionRule.getAmount(), "Transaction: " + transaction.getId() + ", Rule: " + transactionRule.getId()));
                 balanceRepository.save(toBalance);
             }
 

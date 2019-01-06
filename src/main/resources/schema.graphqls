@@ -137,6 +137,9 @@ type Mutation {
     # Transaction that takes items out of the warehouse. Adding a rule is optional.
     createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
 
+    # Transaction that represents an order from a supplier to the warehouse. Adding a rule is optional.
+    createOrderTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
+
     # Transaction that takes items into the warehouse. Adding a rule is optional.
     createReturnTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
 
