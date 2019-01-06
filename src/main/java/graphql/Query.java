@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import repository.*;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 @Component
@@ -114,28 +113,30 @@ public class Query implements GraphQLQueryResolver {
         return transactionRepository.findById(id).orElse(null);
     }
 
-    public List<Transaction> getTransactions(Boolean showOrders, Boolean showReservations, Boolean showReturns, DataFetchingEnvironment env) {
+    public List<Transaction> getTransactions(Boolean showDeleted, Boolean showOrders, Boolean showReservations, Boolean showReturns, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
         ArrayList<Transaction> transactions = new ArrayList<>();
 
-        if (showOrders) {
+        if (showOrders != null && showOrders) {
             transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountName(Account.SUPPLIER));
         }
 
-        if (showReservations) {
+        if (showReservations != null && showReservations) {
             transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountName(Account.WAREHOUSE));
         }
 
-        if (showReturns) {
+        if (showReturns != null && showReturns) {
             transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountName(Account.IN_USE));
         }
 
-
+        if (showDeleted == null || !showDeleted) {
+            ArrayList<Transaction> toRemove = new ArrayList<>();
+            for (Transaction transaction : transactions) if (transaction.getDeletedDate() != null) toRemove.add(transaction);
+            transactions.removeAll(toRemove);
+        }
 
         return transactions;
-
-        // return ((List<Transaction>) transactionRepository.findAll());
     }
 
     public Account getAccount(Integer id, DataFetchingEnvironment env) {

@@ -89,7 +89,10 @@ type Query {
 	location(id: Int!): Location
     categories: [Category]!
     category(id: Int!): Category
-    transactions(showOrders: Boolean, showReservations: Boolean, showReturns: Boolean): [Transaction]!
+
+    # All the parameters are false by default.
+    transactions(showDeleted: Boolean, showOrders: Boolean, showReservations: Boolean, showReturns: Boolean): [Transaction]!
+
     transaction(id: Int!): Transaction
     transactionRules: [TransactionRule]!
     transactionRule(id: Int!): TransactionRule
@@ -129,7 +132,7 @@ type Mutation {
     createInUseAccount: Account
 
     # Every item in the warehouse needs a balance to see how much of it is in stock. Default account is warehouse.
-    createBalance(itemId: Int!, acountId: Int, amount: Int): Balance
+    createBalance(itemId: Int!, accountId: Int, amount: Int): Balance
 
     # Sets the balance to given amount. Creates a balance mutation along with a default reason, if not specified.
     setBalance(balanceId: Int!, amount: Int!, reason: String): Balance
