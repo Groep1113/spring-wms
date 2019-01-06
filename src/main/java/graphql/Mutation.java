@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import repository.*;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -402,10 +401,10 @@ public class Mutation implements GraphQLMutationResolver {
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionId, Transaction.class.getSimpleName())));
 
         if (fromAccountId != null)
-            transaction.setFrom(accountRepository.findById(fromAccountId).orElseThrow(() -> new GraphQLException(idNotFoundMessage(fromAccountId, Account.class.getSimpleName()))));
+            transaction.setFromAccount(accountRepository.findById(fromAccountId).orElseThrow(() -> new GraphQLException(idNotFoundMessage(fromAccountId, Account.class.getSimpleName()))));
 
         if (toAccountId != null)
-            transaction.setTo(accountRepository.findById(toAccountId).orElseThrow(() -> new GraphQLException(idNotFoundMessage(toAccountId, Account.class.getSimpleName()))));
+            transaction.setToAccount(accountRepository.findById(toAccountId).orElseThrow(() -> new GraphQLException(idNotFoundMessage(toAccountId, Account.class.getSimpleName()))));
 
         return transactionRepository.save(transaction);
     }
@@ -463,7 +462,7 @@ public class Mutation implements GraphQLMutationResolver {
         for (TransactionRule transactionRule:
                 transactionRules) {
             Item item = transactionRule.getItem();
-            Account fromAccount = transaction.getFrom();
+            Account fromAccount = transaction.getFromAccount();
             if (fromAccount.getName().equals(Account.WAREHOUSE)) {
                 Balance balance = balanceRepository
                         .findByAccountAndItem(fromAccount, item)
@@ -483,8 +482,8 @@ public class Mutation implements GraphQLMutationResolver {
                 transactionRules) {
 
             Item item = transactionRule.getItem();
-            Account fromAccount = transaction.getFrom();
-            Account toAccount = transaction.getTo();
+            Account fromAccount = transaction.getFromAccount();
+            Account toAccount = transaction.getToAccount();
 
             if (fromAccount.getName().equals(Account.WAREHOUSE)) {
                 Balance fromBalance = balanceRepository

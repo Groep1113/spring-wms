@@ -40,8 +40,8 @@ type Category {
 
 type Transaction {
     id: Int!
-    from: Account!
-    to: Account!
+    fromAccount: Account!
+    toAccount: Account!
     createdDate: LocalDate!
     updateDate: LocalDate!
     deletedDate: LocalDate
@@ -89,7 +89,7 @@ type Query {
 	location(id: Int!): Location
     categories: [Category]!
     category(id: Int!): Category
-    transactions: [Transaction]!
+    transactions(showOrders: Boolean, showReservations: Boolean, showReturns: Boolean): [Transaction]!
     transaction(id: Int!): Transaction
     transactionRules: [TransactionRule]!
     transactionRule(id: Int!): TransactionRule
