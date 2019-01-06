@@ -12,7 +12,6 @@ import repository.*;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 @SuppressWarnings("unused")
 @Component
@@ -20,6 +19,7 @@ public class Mutation implements GraphQLMutationResolver {
 
     private UserRepository userRepository;
     private ItemRepository itemRepository;
+    private SupplierRepository supplierRepository;
     private LocationRepository locationRepository;
     private CategoryRepository categoryRepository;
     private RoleRepository roleRepository;
@@ -33,6 +33,7 @@ public class Mutation implements GraphQLMutationResolver {
     public Mutation(
         UserRepository userRepository,
         ItemRepository itemRepository,
+        SupplierRepository supplierRepository,
         LocationRepository locationRepository,
         CategoryRepository categoryRepository,
         RoleRepository roleRepository,
@@ -44,6 +45,7 @@ public class Mutation implements GraphQLMutationResolver {
     ) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
+        this.supplierRepository = supplierRepository;
         this.locationRepository = locationRepository;
         this.categoryRepository = categoryRepository;
         this.roleRepository = roleRepository;
@@ -230,8 +232,9 @@ public class Mutation implements GraphQLMutationResolver {
         return true;
     }
 
-    public User createUser(String firstName, String lastName, String email, String
-        password, DataFetchingEnvironment env) {
+    public User createUser(
+        String firstName, String lastName, String email, String password, DataFetchingEnvironment env
+    ) {
         AuthContext.requireAuth(env);
 
         User user = new User();
@@ -485,8 +488,8 @@ public class Mutation implements GraphQLMutationResolver {
         }
     }
 
-    private Supplier<GraphQLException> noStockDefined(Account account, Item item) {
-        return () -> new GraphQLException("No stock defined for item " + item.getName() + " at " + account.getName() + ".");
+    private GraphQLException noStockDefined(Account account, Item item) {
+        return new GraphQLException("No stock defined for item " + item.getName() + " at " + account.getName() + ".");
     }
 
     private void processBalanceChanges(Transaction transaction) {
@@ -501,7 +504,7 @@ public class Mutation implements GraphQLMutationResolver {
             if (fromAccount.getName().equals(Account.WAREHOUSE)) {
                 Balance fromBalance = balanceRepository
                     .findByAccountAndItem(fromAccount, item)
-                    .orElseThrow(noStockDefined(fromAccount, item));
+                    .orElseThrow(() -> noStockDefined(fromAccount, item));
 
                 fromBalance.setAmount(fromBalance.getAmount() + transactionRule.getAmount() * -1);
                 balanceMutationRepository.save(new BalanceMutation(fromAccount, item, transactionRule.getAmount() * -1, "Transaction: " + transaction.getId() + ", Rule: " + transactionRule.getId()));
@@ -511,7 +514,7 @@ public class Mutation implements GraphQLMutationResolver {
             if (toAccount.getName().equals(Account.WAREHOUSE)) {
                 Balance toBalance = balanceRepository
                     .findByAccountAndItem(toAccount, item)
-                    .orElseThrow(noStockDefined(toAccount, item));
+                    .orElseThrow(() -> noStockDefined(toAccount, item));
 
                 toBalance.setAmount(toBalance.getAmount() + transactionRule.getAmount());
                 balanceMutationRepository.save(new BalanceMutation(toAccount, item, transactionRule.getAmount() * -1, "Transaction: " + transaction.getId() + ", Rule: " + transactionRule.getId()));
@@ -539,6 +542,51 @@ public class Mutation implements GraphQLMutationResolver {
         transaction.setReceivedDate(LocalDate.now());
         transaction.setLocked(true);
         return transactionRepository.save(transaction);
+    }
+
+    public User updateUser(
+        Integer id, String firstName, String lastName, String email, String password, DataFetchingEnvironment env
+    ) {
+        AuthContext.requireAuth(env);
+
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, User.class.getSimpleName())));
+
+        if (!firstName.isEmpty()) user.setFirstName(firstName);
+        if (!lastName.isEmpty()) user.setLastName(lastName);
+        if (!email.isEmpty()) user.setEmail(email);
+        if (!password.isEmpty()) user.setPassword(password);
+
+        return userRepository.save(user);
+    }
+
+    public Supplier createSupplier(String name, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Supplier supplier = new Supplier();
+        supplier.setName(name);
+
+        return supplierRepository.save(supplier);
+    }
+
+    public Supplier updateSupplier(String name, Integer id, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Supplier supplier = supplierRepository.findById(id)
+            .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, Supplier.class.getSimpleName())));
+        supplier.setName(name);
+
+        return supplierRepository.save(supplier);
+    }
+
+    public Supplier deleteSupplier(Integer id, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Supplier supplier = supplierRepository.findById(id)
+            .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, Supplier.class.getSimpleName())));
+
+        supplierRepository.delete(supplier);
+        return supplier;
     }
 }
 
