@@ -10,10 +10,13 @@ import repository.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings("unused")
 @Component
 public class Query implements GraphQLQueryResolver {
 
     private UserRepository userRepository;
+    private RoleRepository roleRepository;
+    private SupplierRepository supplierRepository;
     private ItemRepository itemRepository;
     private LocationRepository locationRepository;
     private CategoryRepository categoryRepository;
@@ -25,6 +28,8 @@ public class Query implements GraphQLQueryResolver {
 
     @Autowired
     public Query(UserRepository userRepository,
+                 RoleRepository roleRepository,
+                 SupplierRepository supplierRepository,
                  ItemRepository itemRepository,
                  LocationRepository locationRepository,
                  CategoryRepository categoryRepository,
@@ -34,6 +39,8 @@ public class Query implements GraphQLQueryResolver {
                  BalanceRepository balanceRepository,
                  BalanceMutationRepository balanceMutationRepository) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.supplierRepository = supplierRepository;
         this.itemRepository = itemRepository;
         this.locationRepository = locationRepository;
         this.categoryRepository = categoryRepository;
@@ -44,8 +51,6 @@ public class Query implements GraphQLQueryResolver {
         this.balanceMutationRepository = balanceMutationRepository;
     }
 
-
-
     // These method names have to line up with the schema.graphqls field definitions
     // (these are the get methods for our graphql schema)
 
@@ -53,6 +58,12 @@ public class Query implements GraphQLQueryResolver {
         AuthContext.requireAuth(env);
 
         return ((List<User>) userRepository.findAll());
+    }
+
+    public User getCurrentUser(DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return ((AuthContext) env.getContext()).getUser();
     }
 
     public User getUserByMail(String email, DataFetchingEnvironment env) {
@@ -69,6 +80,18 @@ public class Query implements GraphQLQueryResolver {
         return userRepository
             .findById(id)
             .orElse(null);
+    }
+
+    public Role getRole(Integer id, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return roleRepository.findById(id).orElse(null);
+    }
+
+    public List<Role> getRoles(DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return ((List<Role>) roleRepository.findAll());
     }
 
     public List<Item> getItems(DataFetchingEnvironment env) {
@@ -186,4 +209,17 @@ public class Query implements GraphQLQueryResolver {
 
         return ((List<TransactionRule>) transactionRuleRepository.findAll());
     }
+
+    public List<Supplier> getSuppliers(DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return ((List<Supplier>) supplierRepository.findAll());
+    }
+
+    public Supplier getSupplier(Integer id, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return supplierRepository.findById(id).orElse(null);
+    }
+
 }

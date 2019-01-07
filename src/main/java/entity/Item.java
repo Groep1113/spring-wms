@@ -21,6 +21,9 @@ public class Item {
     @JoinTable
     private Set<Category> categories;
 
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    private Supplier supplier;
+
     public Item(String name, String code, Integer recommendedStock, Location location) {
         this.name = name;
         this.code = code;
@@ -87,5 +90,13 @@ public class Item {
 
     public void removeCategory(Category category) {
         categories.remove(category);
+    }
+
+    public Supplier getSupplier() {
+        return supplier;
+    }
+
+    public void setSupplier(Supplier supplier) {
+        this.supplier = supplier;
     }
 }
