@@ -16,10 +16,10 @@ public class Transaction {
     private Integer id;
 
     @ManyToOne
-    private Account from;
+    private Account fromAccount;
 
     @ManyToOne
-    private Account to;
+    private Account toAccount;
 
     @NotNull
     private LocalDate createdDate;
@@ -39,17 +39,17 @@ public class Transaction {
 
     private static final String LOCKED_MESSAGE = "Transaction is locked and therefore, no changes can be made.";
 
-    public Transaction(Account from, Account to) {
-        this.from = from;
-        this.to = to;
+    public Transaction(Account fromAccount, Account toAccount) {
+        this.fromAccount = fromAccount;
+        this.toAccount = toAccount;
         this.createdDate = LocalDate.now();
         this.updateDate = LocalDate.now();
         this.locked = false;
     }
 
-    public Transaction(Account from, Account to, @NotNull LocalDate createdDate, @NotNull LocalDate updateDate, @NotNull Boolean locked) {
-        this.from = from;
-        this.to = to;
+    public Transaction(Account fromAccount, Account toAccount, @NotNull LocalDate createdDate, @NotNull LocalDate updateDate, @NotNull Boolean locked) {
+        this.fromAccount = fromAccount;
+        this.toAccount = toAccount;
         this.createdDate = createdDate;
         this.updateDate = updateDate;
         this.locked = locked;
@@ -112,22 +112,22 @@ public class Transaction {
         this.locked = locked;
     }
 
-    public Account getFrom() {
-        return from;
+    public Account getFromAccount() {
+        return fromAccount;
     }
 
-    public void setFrom(Account from) {
+    public void setFromAccount(Account fromAccount) {
         if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
-        this.from = from;
+        this.fromAccount = fromAccount;
     }
 
-    public Account getTo() {
-        return to;
+    public Account getToAccount() {
+        return toAccount;
     }
 
-    public void setTo(Account to) {
+    public void setToAccount(Account toAccount) {
         if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
-        this.to = to;
+        this.toAccount = toAccount;
     }
 
     public Set<TransactionRule> getTransactionRules() {
