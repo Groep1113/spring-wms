@@ -11,6 +11,7 @@ type User {
     firstName: String!
     lastName: String!
     email: String!
+    token: String
     roles: [Role]!
 }
 
@@ -26,6 +27,7 @@ type Item {
     recommendedStock: Int!
     locations: [Location]!
     categories: [Category]!
+    supplier: Supplier
 }
 
 type Location {
@@ -36,6 +38,11 @@ type Location {
     height: Int!
     items: [Item]!
     categories: [Category]!
+}
+
+type Supplier {
+    id: Int!
+    name: String!
 }
 
 type Category {
@@ -90,6 +97,11 @@ type Query {
     users: [User]!
     userByMail(email: String!): User
 	user(id: Int!): User
+	suppliers: [Supplier]!
+	supplier(id: Int!): Supplier
+	roles: [Role]!
+	role(id: Int!): Role
+	currentUser: User
 	items: [Item]!
 	item(id: Int!): Item
 	locations: [Location]!
@@ -111,6 +123,10 @@ type Query {
 type Mutation {
     login(email: String!, password: String!): LoginPayload
 
+    createSupplier(name: String!): Supplier
+    updateSupplier(name: String!, id: Int!): Supplier
+    deleteSupplier(id: Int!): Supplier
+
     createItem(name: String!, code: String!, recommendedStock: Int!, locationId: Int!): Item
     deleteItem(itemId: Int!): Boolean
     itemAddLocation(itemId: Int!, locationId: Int!): Item
@@ -121,6 +137,7 @@ type Mutation {
     createUser(firstName: String!, lastName: String!, email: String!, password: String!): User
     addRole(userId: Int!, roleId: Int!): User
     removeRole(userId: Int!, roleId: Int!): User
+    updateUser(id: Int!, firstName: String, lastName: String, email: String, password: String): User
 
     createLocation(code: String!, depth: Int!, width: Int!, height: Int!): Location
     deleteLocation(locationId: Int!): Boolean
