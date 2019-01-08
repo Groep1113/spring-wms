@@ -19,18 +19,18 @@ public class Item {
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable
-    private Set<Category> categories;
+    private Set<Category> categories = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private Supplier supplier;
 
-    public Item(String name, String code, Integer recommendedStock, Location location) {
+    public Item(String name, String code, Integer recommendedStock, Location location, Category category, Supplier supplier) {
         this.name = name;
-        this.code = code;
-        this.recommendedStock = recommendedStock;
-        this.locations = new HashSet<>();
-        locations.add(location);
-        this.categories = new HashSet<>();
+        if (code != null) this.code = code;
+        if (recommendedStock != null) this.recommendedStock = recommendedStock;
+        if (location != null) locations.add(location);
+        if (category != null) categories.add(category);
+        if (supplier != null) this.supplier = supplier;
     }
 
     public Item() {
