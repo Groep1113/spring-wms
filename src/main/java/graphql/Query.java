@@ -25,6 +25,7 @@ public class Query implements GraphQLQueryResolver {
     private AccountRepository accountRepository;
     private BalanceRepository balanceRepository;
     private BalanceMutationRepository balanceMutationRepository;
+    private ItemAttributeRepository itemAttributeRepository;
 
     @Autowired
     public Query(UserRepository userRepository,
@@ -37,7 +38,8 @@ public class Query implements GraphQLQueryResolver {
                  TransactionRuleRepository transactionRuleRepository,
                  AccountRepository accountRepository,
                  BalanceRepository balanceRepository,
-                 BalanceMutationRepository balanceMutationRepository) {
+                 BalanceMutationRepository balanceMutationRepository,
+                 ItemAttributeRepository itemAttributeRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.supplierRepository = supplierRepository;
@@ -49,6 +51,7 @@ public class Query implements GraphQLQueryResolver {
         this.accountRepository = accountRepository;
         this.balanceRepository = balanceRepository;
         this.balanceMutationRepository = balanceMutationRepository;
+        this.itemAttributeRepository = itemAttributeRepository;
     }
 
     // These method names have to line up with the schema.graphqls field definitions
@@ -222,4 +225,15 @@ public class Query implements GraphQLQueryResolver {
         return supplierRepository.findById(id).orElse(null);
     }
 
+    public ItemAttribute getItemAttribute(Integer id, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return itemAttributeRepository.findById(id).orElse(null);
+    }
+
+    public List<ItemAttribute> getItemAttributes(DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return ((List<ItemAttribute>) itemAttributeRepository.findAll());
+    }
 }
