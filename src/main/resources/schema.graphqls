@@ -30,6 +30,12 @@ type Item {
     supplier: Supplier
 }
 
+type ItemAttribute {
+    id: Int!
+    name: String!
+    value: String!
+}
+
 type Location {
     id: Int!
     code: String!
@@ -121,6 +127,8 @@ type Query {
     balance(id: Int!): Balance
     balanceMutations: [BalanceMutation]!
     balanceMutation(id: Int!): BalanceMutation
+    itemAttribute(id: Int!): ItemAttribute
+    itemAttributes: [ItemAttribute]!
 }
 
 type Mutation {
