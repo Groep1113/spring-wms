@@ -77,17 +77,45 @@ public class Mutation implements GraphQLMutationResolver {
         return new LoginPayload(token, user);
     }
 
-    public Item createItem(String name, String code, int recommendedStock, int locationId, DataFetchingEnvironment
+    public Item createItem(String name, String code, Integer recommendedStock, Integer locationId, Integer categoryId, Integer supplierId, DataFetchingEnvironment
         env) {
         AuthContext.requireAuth(env);
+
+        Location location = locationId == null ? null : locationRepository
+                .findById(locationId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
+
+        Category category = categoryId == null ? null : categoryRepository
+                .findById(categoryId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(categoryId, Category.class.getSimpleName())));
+
+        Supplier supplier = supplierId == null ? null : supplierRepository
+                .findById(supplierId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(supplierId, Supplier.class.getSimpleName())));
 
         return itemRepository.save(new Item(
             name,
             code,
             recommendedStock,
-            locationRepository
-                .findById(locationId)
-                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())))));
+            location,
+            category,
+            supplier
+        ));
+    }
+
+    public Item updateItem(Integer itemId, String name, String code, Integer recommendedStock, Integer supplierId) {
+        Item item = itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
+
+        if (name != null) item.setName(name);
+        if (code != null) item.setCode(code);
+        if (recommendedStock != null) item.setRecommendedStock(recommendedStock);
+        if (supplierId != null) item.setSupplier(supplierRepository
+                .findById(supplierId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(supplierId, Supplier.class.getSimpleName()))));
+
+        return itemRepository.save(item);
     }
 
     public Location createLocation(String code, int depth, int width, int height, DataFetchingEnvironment env) {
