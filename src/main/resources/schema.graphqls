@@ -28,10 +28,10 @@ type Item {
     locations: [Location]
     categories: [Category]
     supplier: Supplier
-    itemAttributes: [ItemAttribute]!
+    attributes: [Attribute]!
 }
 
-type ItemAttribute {
+type Attribute {
     id: Int!
     name: String!
     value: String!
@@ -129,8 +129,8 @@ type Query {
     balance(id: Int!): Balance
     balanceMutations: [BalanceMutation]!
     balanceMutation(id: Int!): BalanceMutation
-    itemAttribute(id: Int!): ItemAttribute
-    itemAttributes: [ItemAttribute]!
+    attribute(id: Int!): Attribute
+    attributes: [Attribute]!
 }
 
 type Mutation {
@@ -147,9 +147,9 @@ type Mutation {
     itemRemoveLocation(itemId: Int!, locationId: Int!): Item
     itemAddCategory(itemId: Int!, categoryId: Int!): Item
     itemRemoveCategory(itemId: Int!, categoryId: Int!): Item
-    itemAddAttribute(itemId: Int!, name: String!, value: String!): Item
-    deleteAttribute(itemAttributeId: Int!): Boolean
-    updateItemAttribute(itemAttributeId: Int!, name: String, value: String, itemId: Int): ItemAttribute
+    createAttribute(itemId: Int!, name: String!, value: String!): Item
+    deleteAttribute(attributeId: Int!): Boolean
+    updateAttribute(attributeId: Int!, name: String, value: String, itemId: Int): Attribute
 
     createUser(firstName: String!, lastName: String!, email: String!, password: String!): User
     addRole(userId: Int!, roleId: Int!): User
