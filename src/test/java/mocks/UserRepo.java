@@ -5,7 +5,7 @@ import repository.UserRepository;
 
 import java.util.Optional;
 
-public class MockUserRepo implements UserRepository {
+public class UserRepo implements UserRepository {
     @Override
     public Optional<User> findByEmail(String email) {
         return Optional.empty();
@@ -28,6 +28,12 @@ public class MockUserRepo implements UserRepository {
 
     @Override
     public Optional<User> authenticate(String email, String password) {
+        if (email.equals("unitTest@bs-htg.nl") && password.equals("habbo123")) {
+            User user = new User();
+            user.setEmail("unitTest@bs-htg.nl");
+            user.setPassword("habbo123");
+            return Optional.of(user);
+        }
         return Optional.empty();
     }
 
