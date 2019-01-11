@@ -21,6 +21,9 @@ public class Item {
     @JoinTable
     private Set<Category> categories;
 
+    @OneToMany(mappedBy = "item", fetch = FetchType.EAGER)
+    private Set<ItemAttribute> itemAttributes = new HashSet<>();
+
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private Supplier supplier;
 
@@ -98,5 +101,13 @@ public class Item {
 
     public void setSupplier(Supplier supplier) {
         this.supplier = supplier;
+    }
+
+    public Set<ItemAttribute> getItemAttributes() {
+        return itemAttributes;
+    }
+
+    public void setItemAttributes(Set<ItemAttribute> itemAttributes) {
+        this.itemAttributes = itemAttributes;
     }
 }

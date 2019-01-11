@@ -28,12 +28,14 @@ type Item {
     locations: [Location]!
     categories: [Category]!
     supplier: Supplier
+    itemAttributes: [ItemAttribute]!
 }
 
 type ItemAttribute {
     id: Int!
     name: String!
     value: String!
+    item: Item!
 }
 
 type Location {
@@ -144,6 +146,8 @@ type Mutation {
     itemRemoveLocation(itemId: Int!, locationId: Int!): Item
     itemAddCategory(itemId: Int!, categoryId: Int!): Item
     itemRemoveCategory(itemId: Int!, categoryId: Int!): Item
+    itemAddAttribute(itemId: Int!, name: String!, value: String!): Item
+    deleteAttribute(itemAttributeId: Int!): Boolean
 
     createUser(firstName: String!, lastName: String!, email: String!, password: String!): User
     addRole(userId: Int!, roleId: Int!): User
