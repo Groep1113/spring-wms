@@ -25,7 +25,7 @@ public class Query implements GraphQLQueryResolver {
     private AccountRepository accountRepository;
     private BalanceRepository balanceRepository;
     private BalanceMutationRepository balanceMutationRepository;
-    private ItemAttributeRepository itemAttributeRepository;
+    private AttributeRepository attributeRepository;
 
     @Autowired
     public Query(UserRepository userRepository,
@@ -39,7 +39,7 @@ public class Query implements GraphQLQueryResolver {
                  AccountRepository accountRepository,
                  BalanceRepository balanceRepository,
                  BalanceMutationRepository balanceMutationRepository,
-                 ItemAttributeRepository itemAttributeRepository) {
+                 AttributeRepository attributeRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.supplierRepository = supplierRepository;
@@ -51,7 +51,7 @@ public class Query implements GraphQLQueryResolver {
         this.accountRepository = accountRepository;
         this.balanceRepository = balanceRepository;
         this.balanceMutationRepository = balanceMutationRepository;
-        this.itemAttributeRepository = itemAttributeRepository;
+        this.attributeRepository = attributeRepository;
     }
 
     // These method names have to line up with the schema.graphqls field definitions
@@ -225,15 +225,15 @@ public class Query implements GraphQLQueryResolver {
         return supplierRepository.findById(id).orElse(null);
     }
 
-    public ItemAttribute getItemAttribute(Integer id, DataFetchingEnvironment env) {
+    public Attribute getAttribute(Integer id, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        return itemAttributeRepository.findById(id).orElse(null);
+        return attributeRepository.findById(id).orElse(null);
     }
 
-    public List<ItemAttribute> getItemAttributes(DataFetchingEnvironment env) {
+    public List<Attribute> getAttributes(DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        return ((List<ItemAttribute>) itemAttributeRepository.findAll());
+        return ((List<Attribute>) attributeRepository.findAll());
     }
 }

@@ -28,7 +28,7 @@ public class Mutation implements GraphQLMutationResolver {
     private AccountRepository accountRepository;
     private BalanceMutationRepository balanceMutationRepository;
     private BalanceRepository balanceRepository;
-    private ItemAttributeRepository itemAttributeRepository;
+    private AttributeRepository attributeRepository;
 
     @Autowired
     public Mutation(
@@ -43,7 +43,7 @@ public class Mutation implements GraphQLMutationResolver {
         AccountRepository accountRepository,
         BalanceRepository balanceRepository,
         BalanceMutationRepository balanceMutationRepository,
-        ItemAttributeRepository itemAttributeRepository
+        AttributeRepository attributeRepository
     ) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
@@ -56,7 +56,7 @@ public class Mutation implements GraphQLMutationResolver {
         this.accountRepository = accountRepository;
         this.balanceRepository = balanceRepository;
         this.balanceMutationRepository = balanceMutationRepository;
-        this.itemAttributeRepository = itemAttributeRepository;
+        this.attributeRepository = attributeRepository;
     }
 
     private String idNotFoundMessage(int id, String entity) {
@@ -178,42 +178,42 @@ public class Mutation implements GraphQLMutationResolver {
         throw new GraphQLException("This item (id:" + itemId + ") is not part of this category (id:" + categoryId + "). Therefore, it can not be removed from it.");
     }
 
-    public Item itemAddAttribute(int itemId, String name, String value, DataFetchingEnvironment env) {
+    public Item createAttribute(int itemId, String name, String value, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
         Item item = itemRepository
                 .findById(itemId)
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
 
-        itemAttributeRepository.save(new ItemAttribute(name, value, item));
+        attributeRepository.save(new Attribute(name, value, item));
 
         return item;
     }
 
-    public Boolean deleteAttribute(int itemAttributeId, DataFetchingEnvironment env) {
+    public Boolean deleteAttribute(int attributeId, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        itemAttributeRepository.deleteById(itemAttributeId);
+        attributeRepository.deleteById(attributeId);
 
         return true;
     }
 
-    public ItemAttribute updateItemAttribute(int itemAttributeId, String name, String value, Integer itemId, DataFetchingEnvironment env){
+    public Attribute updateAttribute(int attributeId, String name, String value, Integer itemId, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        ItemAttribute itemAttribute = itemAttributeRepository
-                .findById(itemAttributeId)
-                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemAttributeId, ItemAttribute.class.getSimpleName())));
+        Attribute attribute = attributeRepository
+                .findById(attributeId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(attributeId, Attribute.class.getSimpleName())));
 
-        if (name != null) itemAttribute.setName(name);
-        if (value != null) itemAttribute.setValue(value);
+        if (name != null) attribute.setName(name);
+        if (value != null) attribute.setValue(value);
         if (itemId != null) {
-            itemAttribute.setItem(itemRepository
+            attribute.setItem(itemRepository
                     .findById(itemId)
                     .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName()))));
         }
 
-        return itemAttributeRepository.save(itemAttribute);
+        return attributeRepository.save(attribute);
     }
 
     public Category categoryChangeName(int id, String name, DataFetchingEnvironment env) {
@@ -274,8 +274,6 @@ public class Mutation implements GraphQLMutationResolver {
         itemRepository.delete(itemRepository
             .findById(id)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, Item.class.getSimpleName()))));
-
-        //TODO Delete all related itemAttributes
 
         return true;
     }

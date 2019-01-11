@@ -22,7 +22,7 @@ public class Item {
     private Set<Category> categories;
 
     @OneToMany(mappedBy = "item", fetch = FetchType.EAGER)
-    private Set<ItemAttribute> itemAttributes = new HashSet<>();
+    private Set<Attribute> attributes = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private Supplier supplier;
@@ -103,11 +103,11 @@ public class Item {
         this.supplier = supplier;
     }
 
-    public Set<ItemAttribute> getItemAttributes() {
-        return itemAttributes;
+    public Set<Attribute> getAttributes() {
+        return attributes;
     }
 
-    public void setItemAttributes(Set<ItemAttribute> itemAttributes) {
-        this.itemAttributes = itemAttributes;
+    public void setAttributes(Set<Attribute> attributes) {
+        this.attributes = attributes;
     }
 }

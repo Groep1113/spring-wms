@@ -3,7 +3,7 @@ package entity;
 import javax.persistence.*;
 
 @Entity
-public class ItemAttribute {
+public class Attribute {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -16,10 +16,10 @@ public class ItemAttribute {
     @ManyToOne(fetch = FetchType.EAGER)
     private Item item;
 
-    public ItemAttribute() {
+    public Attribute() {
     }
 
-    public ItemAttribute(String name, String value, Item item) {
+    public Attribute(String name, String value, Item item) {
         this.name = name;
         this.value = value;
         this.item = item;
