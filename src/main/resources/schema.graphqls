@@ -148,6 +148,7 @@ type Mutation {
     itemRemoveCategory(itemId: Int!, categoryId: Int!): Item
     itemAddAttribute(itemId: Int!, name: String!, value: String!): Item
     deleteAttribute(itemAttributeId: Int!): Boolean
+    updateItemAttribute(itemAttributeId: Int!, name: String, value: String, itemId: Int): ItemAttribute
 
     createUser(firstName: String!, lastName: String!, email: String!, password: String!): User
     addRole(userId: Int!, roleId: Int!): User

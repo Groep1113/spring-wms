@@ -198,6 +198,24 @@ public class Mutation implements GraphQLMutationResolver {
         return true;
     }
 
+    public ItemAttribute updateItemAttribute(int itemAttributeId, String name, String value, Integer itemId, DataFetchingEnvironment env){
+        AuthContext.requireAuth(env);
+
+        ItemAttribute itemAttribute = itemAttributeRepository
+                .findById(itemAttributeId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemAttributeId, ItemAttribute.class.getSimpleName())));
+
+        if (name != null) itemAttribute.setName(name);
+        if (value != null) itemAttribute.setValue(value);
+        if (itemId != null) {
+            itemAttribute.setItem(itemRepository
+                    .findById(itemId)
+                    .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName()))));
+        }
+
+        return itemAttributeRepository.save(itemAttribute);
+    }
+
     public Category categoryChangeName(int id, String name, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
