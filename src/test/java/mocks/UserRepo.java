@@ -3,11 +3,30 @@ package mocks;
 import entity.User;
 import repository.UserRepository;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class UserRepo implements UserRepository {
+    private HashMap<Integer, User> usersWithId = new HashMap<>();
+
+    public UserRepo() {
+        User user = new User();
+        user.setFirstName("unit");
+        user.setLastName("test");
+        user.setEmail("unitTest@bs-htg.nl");
+        user.setPassword("habbo123");
+        user.setRoles(new HashSet<>());
+        user.setId(1);
+        usersWithId.put(1, user);
+    }
+
     @Override
     public Optional<User> findByEmail(String email) {
+        if (email.equals("unitTest@bs-htg.nl")) {
+            return Optional.of(usersWithId.get(1));
+        }
         return Optional.empty();
     }
 
@@ -39,7 +58,7 @@ public class UserRepo implements UserRepository {
 
     @Override
     public <S extends User> S save(S entity) {
-        return null;
+        return entity;
     }
 
     @Override
@@ -48,8 +67,9 @@ public class UserRepo implements UserRepository {
     }
 
     @Override
-    public Optional<User> findById(Integer integer) {
-        return Optional.empty();
+    public Optional<User> findById(Integer id) {
+        if (!usersWithId.containsKey(id)) return Optional.empty();
+        return Optional.of(usersWithId.get(id));
     }
 
     @Override
@@ -59,7 +79,7 @@ public class UserRepo implements UserRepository {
 
     @Override
     public Iterable<User> findAll() {
-        return null;
+        return usersWithId.values().parallelStream().collect(Collectors.toList());
     }
 
     @Override

@@ -3,10 +3,24 @@ package mocks;
 import entity.Role;
 import repository.RoleRepository;
 
+import java.util.HashMap;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-public class RoleRepo implements RoleRepository
-{
+public class RoleRepo implements RoleRepository {
+    private HashMap<Integer, Role> rolesWithId = new HashMap<>();
+
+    public RoleRepo() {
+        Role adminRole = new Role();
+        adminRole.setName("admin");
+        adminRole.setId(1);
+        Role salesRole = new Role();
+        salesRole.setName("inkoop");
+        salesRole.setId(2);
+        rolesWithId.put(1, adminRole);
+        rolesWithId.put(2, salesRole);
+    }
+
     @Override
     public <S extends Role> S save(S entity) {
         return null;
@@ -18,8 +32,9 @@ public class RoleRepo implements RoleRepository
     }
 
     @Override
-    public Optional<Role> findById(Integer integer) {
-        return Optional.empty();
+    public Optional<Role> findById(Integer id) {
+        if (!rolesWithId.containsKey(id)) return Optional.empty();
+        return Optional.of(rolesWithId.get(id));
     }
 
     @Override
@@ -29,7 +44,7 @@ public class RoleRepo implements RoleRepository
 
     @Override
     public Iterable<Role> findAll() {
-        return null;
+        return rolesWithId.values().parallelStream().collect(Collectors.toList());
     }
 
     @Override
