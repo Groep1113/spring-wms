@@ -13,7 +13,7 @@ public class ItemAttribute {
 
     private String value;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     private Item item;
 
     public ItemAttribute() {
