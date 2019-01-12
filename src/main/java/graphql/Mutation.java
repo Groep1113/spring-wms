@@ -26,7 +26,6 @@ public class Mutation implements GraphQLMutationResolver {
     private TransactionRepository transactionRepository;
     private TransactionRuleRepository transactionRuleRepository;
     private AccountRepository accountRepository;
-    private BalanceMutationRepository balanceMutationRepository;
     private BalanceRepository balanceRepository;
     private AttributeRepository attributeRepository;
 
@@ -42,7 +41,6 @@ public class Mutation implements GraphQLMutationResolver {
         TransactionRuleRepository transactionRuleRepository,
         AccountRepository accountRepository,
         BalanceRepository balanceRepository,
-        BalanceMutationRepository balanceMutationRepository,
         AttributeRepository attributeRepository
     ) {
         this.userRepository = userRepository;
@@ -55,7 +53,6 @@ public class Mutation implements GraphQLMutationResolver {
         this.transactionRuleRepository = transactionRuleRepository;
         this.accountRepository = accountRepository;
         this.balanceRepository = balanceRepository;
-        this.balanceMutationRepository = balanceMutationRepository;
         this.attributeRepository = attributeRepository;
     }
 
@@ -428,13 +425,6 @@ public class Mutation implements GraphQLMutationResolver {
         else
             mutationAmount = amount - balance.getAmount();
 
-        balanceMutationRepository
-            .save(new BalanceMutation(
-                balance.getAccount(),
-                balance.getItem(),
-                mutationAmount,
-                reason == null ? "Manual balance mutation. No reason given." : reason));
-
         balance.setAmount(amount);
 
         return balance;
@@ -623,7 +613,6 @@ public class Mutation implements GraphQLMutationResolver {
                     .orElseThrow(() -> noStockDefined(fromAccount, item));
 
                 fromBalance.setAmount(fromBalance.getAmount() + transactionRule.getAmount() * -1);
-                balanceMutationRepository.save(new BalanceMutation(fromAccount, item, transactionRule.getAmount(), "Transaction: " + transaction.getId() + ", Rule: " + transactionRule.getId()));
                 balanceRepository.save(fromBalance);
             }
 
@@ -633,7 +622,6 @@ public class Mutation implements GraphQLMutationResolver {
                     .orElseThrow(() -> noStockDefined(toAccount, item));
 
                 toBalance.setAmount(toBalance.getAmount() + transactionRule.getAmount());
-                balanceMutationRepository.save(new BalanceMutation(toAccount, item, transactionRule.getAmount(), "Transaction: " + transaction.getId() + ", Rule: " + transactionRule.getId()));
                 balanceRepository.save(toBalance);
             }
 
