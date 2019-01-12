@@ -24,7 +24,7 @@ public class Mutation implements GraphQLMutationResolver {
     private CategoryRepository categoryRepository;
     private RoleRepository roleRepository;
     private TransactionRepository transactionRepository;
-    private TransactionRuleRepository transactionRuleRepository;
+    private TransactionLineRepository transactionLineRepository;
     private AccountRepository accountRepository;
     private BalanceRepository balanceRepository;
     private AttributeRepository attributeRepository;
@@ -38,7 +38,7 @@ public class Mutation implements GraphQLMutationResolver {
         CategoryRepository categoryRepository,
         RoleRepository roleRepository,
         TransactionRepository transactionRepository,
-        TransactionRuleRepository transactionRuleRepository,
+        TransactionLineRepository transactionLineRepository,
         AccountRepository accountRepository,
         BalanceRepository balanceRepository,
         AttributeRepository attributeRepository
@@ -50,7 +50,7 @@ public class Mutation implements GraphQLMutationResolver {
         this.categoryRepository = categoryRepository;
         this.roleRepository = roleRepository;
         this.transactionRepository = transactionRepository;
-        this.transactionRuleRepository = transactionRuleRepository;
+        this.transactionLineRepository = transactionLineRepository;
         this.accountRepository = accountRepository;
         this.balanceRepository = balanceRepository;
         this.attributeRepository = attributeRepository;
@@ -308,7 +308,7 @@ public class Mutation implements GraphQLMutationResolver {
     public Boolean deleteItem(int id, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        if (transactionRuleRepository.findAllByItemId(id).iterator().hasNext())
+        if (transactionLineRepository.findAllByItemId(id).iterator().hasNext())
             throw new GraphQLException("Cant delete item, because it is being referenced by transaction");
         
         itemRepository.delete(itemRepository
@@ -459,7 +459,7 @@ public class Mutation implements GraphQLMutationResolver {
 
 
         if (itemId != null && amount != null)
-            return createTransactionWithRule(itemId, amount, plannedDate, env, fromAccount, toAccount);
+            return createTransactionWithLine(itemId, amount, plannedDate, env, fromAccount, toAccount);
 
         return transactionRepository.save(new Transaction(fromAccount, toAccount));
     }
@@ -476,7 +476,7 @@ public class Mutation implements GraphQLMutationResolver {
     
     
         if (itemId != null && amount != null)
-            return createTransactionWithRule(itemId, amount, plannedDate, env, fromAccount, toAccount);
+            return createTransactionWithLine(itemId, amount, plannedDate, env, fromAccount, toAccount);
     
         return transactionRepository.save(new Transaction(fromAccount, toAccount));
     }
@@ -495,17 +495,17 @@ public class Mutation implements GraphQLMutationResolver {
             .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)));
 
         if (itemId != null && amount != null)
-            return createTransactionWithRule(itemId, amount, plannedDate, env, fromAccount, toAccount);
+            return createTransactionWithLine(itemId, amount, plannedDate, env, fromAccount, toAccount);
 
         return transactionRepository.save(new Transaction(fromAccount, toAccount));
     }
 
-    private Transaction createTransactionWithRule(
+    private Transaction createTransactionWithLine(
         Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env,
         Account fromAccount, Account toAccount
     ) {
         Transaction transaction = transactionRepository.save(new Transaction(fromAccount, toAccount));
-        addRuleToTransaction(transaction.getId(), itemId, amount, plannedDate, env);
+        addLineToTransaction(transaction.getId(), itemId, amount, plannedDate, env);
 
         return transaction;
     }
@@ -542,7 +542,7 @@ public class Mutation implements GraphQLMutationResolver {
         return transactionRepository.save(transaction);
     }
 
-    public TransactionRule addRuleToTransaction(
+    public TransactionLine addLineToTransaction(
         Integer transactionId, Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env
     ) {
         AuthContext.requireAuth(env);
@@ -557,54 +557,54 @@ public class Mutation implements GraphQLMutationResolver {
             .findById(itemId)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
 
-        return transactionRuleRepository.save(new TransactionRule(amount, transaction, item, plannedDate == null ? LocalDate.now() : plannedDate));
+        return transactionLineRepository.save(new TransactionLine(amount, transaction, item, plannedDate == null ? LocalDate.now() : plannedDate));
     }
 
-    public TransactionRule changeTransactionRule(
-        Integer transactionRuleId, Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env
+    public TransactionLine changeTransactionLine(
+        Integer transactionLineId, Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env
     ) {
         AuthContext.requireAuth(env);
 
-        TransactionRule transactionRule = transactionRuleRepository
-            .findById(transactionRuleId)
-            .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionRuleId, TransactionRule.class.getSimpleName())));
+        TransactionLine transactionLine = transactionLineRepository
+            .findById(transactionLineId)
+            .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionLineId, TransactionLine.class.getSimpleName())));
 
-        if (transactionRule.getTransaction().getLocked())
-            throw new GraphQLException("The transaction linked to this rule is locked, and therefore, can not be changed.");
+        if (transactionLine.getTransaction().getLocked())
+            throw new GraphQLException("The transaction linked to this line is locked, and therefore, can not be changed.");
 
         if (itemId != null)
-            transactionRule.setItem(itemRepository
+            transactionLine.setItem(itemRepository
                 .findById(itemId)
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName()))));
 
         if (amount != null)
-            transactionRule.setAmount(amount);
+            transactionLine.setAmount(amount);
 
         if (plannedDate != null)
-            transactionRule.setPlannedDate(plannedDate);
+            transactionLine.setPlannedDate(plannedDate);
 
-        return transactionRuleRepository.save(transactionRule);
+        return transactionLineRepository.save(transactionLine);
     }
 
-    public Boolean deleteTransactionRule(Integer transactionRuleId, DataFetchingEnvironment env) {
+    public Boolean deleteTransactionLine(Integer transactionLineId, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        transactionRuleRepository.deleteById(transactionRuleId);
+        transactionLineRepository.deleteById(transactionLineId);
         return true;
     }
 
     private void safeTransactionCheck(Transaction transaction) {
-        Iterable<TransactionRule> transactionRules = transactionRuleRepository.findAllByTransactionId(transaction.getId());
+        Iterable<TransactionLine> transactionLines = transactionLineRepository.findAllByTransactionId(transaction.getId());
 
-        for (TransactionRule transactionRule :
-            transactionRules) {
-            Item item = transactionRule.getItem();
+        for (TransactionLine transactionLine :
+            transactionLines) {
+            Item item = transactionLine.getItem();
             Account fromAccount = transaction.getFromAccount();
             if (fromAccount.getName().equals(Account.WAREHOUSE)) {
                 Balance balance = balanceRepository
                         .findByAccountAndItem(fromAccount, item)
                         .orElseThrow(() -> noStockDefined(fromAccount, item));
-                if (balance.getAmount() < transactionRule.getAmount()) throw new GraphQLException("Not enough stock for item");
+                if (balance.getAmount() < transactionLine.getAmount()) throw new GraphQLException("Not enough stock for item");
             }
         }
     }
@@ -614,11 +614,11 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     private void processBalanceChanges(Transaction transaction) {
-        Iterable<TransactionRule> transactionRules = transactionRuleRepository.findAllByTransactionId(transaction.getId());
-        for (TransactionRule transactionRule :
-            transactionRules) {
+        Iterable<TransactionLine> transactionLines = transactionLineRepository.findAllByTransactionId(transaction.getId());
+        for (TransactionLine transactionLine :
+            transactionLines) {
 
-            Item item = transactionRule.getItem();
+            Item item = transactionLine.getItem();
             Account fromAccount = transaction.getFromAccount();
             Account toAccount = transaction.getToAccount();
 
@@ -627,7 +627,7 @@ public class Mutation implements GraphQLMutationResolver {
                     .findByAccountAndItem(fromAccount, item)
                     .orElseThrow(() -> noStockDefined(fromAccount, item));
 
-                fromBalance.setAmount(fromBalance.getAmount() + transactionRule.getAmount() * -1);
+                fromBalance.setAmount(fromBalance.getAmount() + transactionLine.getAmount() * -1);
                 balanceRepository.save(fromBalance);
             }
 
@@ -636,12 +636,12 @@ public class Mutation implements GraphQLMutationResolver {
                     .findByAccountAndItem(toAccount, item)
                     .orElseThrow(() -> noStockDefined(toAccount, item));
 
-                toBalance.setAmount(toBalance.getAmount() + transactionRule.getAmount());
+                toBalance.setAmount(toBalance.getAmount() + transactionLine.getAmount());
                 balanceRepository.save(toBalance);
             }
 
-            transactionRule.setActualDate(LocalDate.now());
-            transactionRuleRepository.save(transactionRule);
+            transactionLine.setActualDate(LocalDate.now());
+            transactionLineRepository.save(transactionLine);
         }
     }
 

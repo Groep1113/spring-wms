@@ -35,7 +35,7 @@ public class Transaction {
     private Boolean locked;
 
     @OneToMany(mappedBy = "transaction", fetch = FetchType.EAGER)
-    private Set<TransactionRule> transactionRules;
+    private Set<TransactionLine> transactionLines;
 
     private static final String LOCKED_MESSAGE = "Transaction is locked and therefore, no changes can be made.";
 
@@ -130,11 +130,11 @@ public class Transaction {
         this.toAccount = toAccount;
     }
 
-    public Set<TransactionRule> getTransactionRules() {
-        return transactionRules;
+    public Set<TransactionLine> getTransactionLines() {
+        return transactionLines;
     }
 
-    public void setTransactionRules(Set<TransactionRule> transactionRules) {
-        this.transactionRules = transactionRules;
+    public void setTransactionLines(Set<TransactionLine> transactionLines) {
+        this.transactionLines = transactionLines;
     }
 }

@@ -21,7 +21,7 @@ public class Query implements GraphQLQueryResolver {
     private LocationRepository locationRepository;
     private CategoryRepository categoryRepository;
     private TransactionRepository transactionRepository;
-    private TransactionRuleRepository transactionRuleRepository;
+    private TransactionLineRepository transactionLineRepository;
     private AccountRepository accountRepository;
     private BalanceRepository balanceRepository;
     private AttributeRepository attributeRepository;
@@ -34,7 +34,7 @@ public class Query implements GraphQLQueryResolver {
                  LocationRepository locationRepository,
                  CategoryRepository categoryRepository,
                  TransactionRepository transactionRepository,
-                 TransactionRuleRepository transactionRuleRepository,
+                 TransactionLineRepository transactionLineRepository,
                  AccountRepository accountRepository,
                  BalanceRepository balanceRepository,
                  AttributeRepository attributeRepository) {
@@ -45,7 +45,7 @@ public class Query implements GraphQLQueryResolver {
         this.locationRepository = locationRepository;
         this.categoryRepository = categoryRepository;
         this.transactionRepository = transactionRepository;
-        this.transactionRuleRepository = transactionRuleRepository;
+        this.transactionLineRepository = transactionLineRepository;
         this.accountRepository = accountRepository;
         this.balanceRepository = balanceRepository;
         this.attributeRepository = attributeRepository;
@@ -186,16 +186,16 @@ public class Query implements GraphQLQueryResolver {
         return ((List<Balance>) balanceRepository.findAll());
     }
 
-    public TransactionRule getTransactionRule(Integer id, DataFetchingEnvironment env) {
+    public TransactionLine getTransactionLine(Integer id, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        return transactionRuleRepository.findById(id).orElse(null);
+        return transactionLineRepository.findById(id).orElse(null);
     }
 
-    public List<TransactionRule> getTransactionRules(DataFetchingEnvironment env) {
+    public List<TransactionLine> getTransactionLines(DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        return ((List<TransactionRule>) transactionRuleRepository.findAll());
+        return ((List<TransactionLine>) transactionLineRepository.findAll());
     }
 
     public List<Supplier> getSuppliers(DataFetchingEnvironment env) {
