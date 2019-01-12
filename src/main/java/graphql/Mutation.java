@@ -625,7 +625,7 @@ public class Mutation implements GraphQLMutationResolver {
                 balanceRepository.save(toBalance);
             }
 
-            transactionLine.setActualDate(LocalDate.now());
+            transaction.setReceivedDate(LocalDate.now());
             transactionLineRepository.save(transactionLine);
         }
     }
