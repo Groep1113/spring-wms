@@ -76,7 +76,6 @@ type TransactionLine {
     id: Int!
     amount: Int!
     plannedDate: LocalDate!
-    actualDate: LocalDate!
     transaction: Transaction!
     item: Item!
 }

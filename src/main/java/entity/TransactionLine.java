@@ -16,8 +16,6 @@ public class TransactionLine {
 
     private LocalDate plannedDate;
 
-    private LocalDate actualDate;
-
     @ManyToOne
     private Transaction transaction;
 
@@ -56,14 +54,6 @@ public class TransactionLine {
 
     public void setPlannedDate(LocalDate plannedDate) {
         this.plannedDate = plannedDate;
-    }
-
-    public LocalDate getActualDate() {
-        return actualDate;
-    }
-
-    public void setActualDate(LocalDate actualDate) {
-        this.actualDate = actualDate;
     }
 
     public Transaction getTransaction() {
