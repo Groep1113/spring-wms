@@ -69,10 +69,10 @@ type Transaction {
     deletedDate: LocalDate
     receivedDate: LocalDate
     locked: Boolean!
-    transactionRules: [TransactionRule]!
+    transactionLines: [TransactionLine]!
 }
 
-type TransactionRule {
+type TransactionLine {
     id: Int!
     amount: Int!
     plannedDate: LocalDate!
@@ -113,8 +113,8 @@ type Query {
     transactions(showDeleted: Boolean, showOrders: Boolean, showReservations: Boolean, showReturns: Boolean): [Transaction]!
 
     transaction(id: Int!): Transaction
-    transactionRules: [TransactionRule]!
-    transactionRule(id: Int!): TransactionRule
+    transactionLines: [TransactionLine]!
+    transactionLine(id: Int!): TransactionLine
     accounts: [Account]!
     account(id: Int!): Account
     balances: [Balance]!
@@ -167,20 +167,20 @@ type Mutation {
     # Sets the balance to given amount. Creates a balance mutation along with a default reason, if not specified.
     setBalance(balanceId: Int!, amount: Int!, reason: String): Balance
 
-    # Transaction that takes items out of the warehouse. Adding a rule is optional.
+    # Transaction that takes items out of the warehouse. Adding a line is optional.
     createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
 
-    # Transaction that represents an order from a supplier to the warehouse. Adding a rule is optional.
+    # Transaction that represents an order from a supplier to the warehouse. Adding a line is optional.
     createOrderTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
 
-    # Transaction that takes items into the warehouse. Adding a rule is optional.
+    # Transaction that takes items into the warehouse. Adding a line is optional.
     createReturnTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
 
-    # Adds rule to transaction. Default planned date is today.
-    addRuleToTransaction(transactionId: Int!, itemId: Int!, amount: Int!, plannedDate: LocalDate): TransactionRule
+    # Adds line to transaction. Default planned date is today.
+    addLineToTransaction(transactionId: Int!, itemId: Int!, amount: Int!, plannedDate: LocalDate): TransactionLine
 
-    # Allows you to change properties of the transaction rule.
-    changeTransactionRule(transactionRuleId: Int!, itemId: Int, amount: Int, plannedDate: LocalDate): TransactionRule
+    # Allows you to change properties of the transaction line.
+    changeTransactionLine(TransactionLineId: Int!, itemId: Int, amount: Int, plannedDate: LocalDate): TransactionLine
 
     # Allows you to change sending- and/or receiving account of transaction.
     changeTransaction(transactionId: Int!, fromAccountId: Int, toAccountId: Int): Transaction
@@ -191,6 +191,6 @@ type Mutation {
     # Fake delete action. It only sets the date_deleted to the current day and locks the transaction.
     deleteTransaction(transactionId: Int!): Transaction
 
-    # Deletes transaction rule, ignoring lock.
-    deleteTransactionRule(transactionRuleId: Int!): Boolean
+    # Deletes transaction line, ignoring lock.
+    deleteTransactionLine(TransactionLineId: Int!): Boolean
 }

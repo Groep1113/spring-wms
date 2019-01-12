@@ -5,7 +5,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @Entity
-public class TransactionRule {
+public class TransactionLine {
 
     @Id
     @GeneratedValue
@@ -24,14 +24,14 @@ public class TransactionRule {
     @OneToOne
     private Item item;
 
-    public TransactionRule(@NotNull Integer amount, Transaction transaction, Item item, LocalDate plannedDate) {
+    public TransactionLine(@NotNull Integer amount, Transaction transaction, Item item, LocalDate plannedDate) {
         this.amount = amount;
         this.transaction = transaction;
         this.item = item;
         this.plannedDate = plannedDate;
     }
 
-    public TransactionRule() {
+    public TransactionLine() {
     }
 
     public Integer getId() {
