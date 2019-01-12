@@ -24,7 +24,6 @@ public class Query implements GraphQLQueryResolver {
     private TransactionRuleRepository transactionRuleRepository;
     private AccountRepository accountRepository;
     private BalanceRepository balanceRepository;
-    private BalanceMutationRepository balanceMutationRepository;
     private AttributeRepository attributeRepository;
 
     @Autowired
@@ -38,7 +37,6 @@ public class Query implements GraphQLQueryResolver {
                  TransactionRuleRepository transactionRuleRepository,
                  AccountRepository accountRepository,
                  BalanceRepository balanceRepository,
-                 BalanceMutationRepository balanceMutationRepository,
                  AttributeRepository attributeRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
@@ -50,7 +48,6 @@ public class Query implements GraphQLQueryResolver {
         this.transactionRuleRepository = transactionRuleRepository;
         this.accountRepository = accountRepository;
         this.balanceRepository = balanceRepository;
-        this.balanceMutationRepository = balanceMutationRepository;
         this.attributeRepository = attributeRepository;
     }
 
@@ -187,18 +184,6 @@ public class Query implements GraphQLQueryResolver {
         AuthContext.requireAuth(env);
 
         return ((List<Balance>) balanceRepository.findAll());
-    }
-
-    public BalanceMutation getBalanceMutation(Integer id, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
-
-        return balanceMutationRepository.findById(id).orElse(null);
-    }
-
-    public List<BalanceMutation> getBalanceMutations(DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
-
-        return ((List<BalanceMutation>) balanceMutationRepository.findAll());
     }
 
     public TransactionRule getTransactionRule(Integer id, DataFetchingEnvironment env) {

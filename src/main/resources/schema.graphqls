@@ -93,14 +93,6 @@ type Balance {
     account: Account!
 }
 
-type BalanceMutation {
-    id: Int!
-    item: Item!
-    account: Account!
-    amount: Int!
-    reason: String!
-}
-
 type Query {
     users: [User]!
     userByMail(email: String!): User
@@ -127,8 +119,6 @@ type Query {
     account(id: Int!): Account
     balances: [Balance]!
     balance(id: Int!): Balance
-    balanceMutations: [BalanceMutation]!
-    balanceMutation(id: Int!): BalanceMutation
     attribute(id: Int!): Attribute
     attributes: [Attribute]!
 }
