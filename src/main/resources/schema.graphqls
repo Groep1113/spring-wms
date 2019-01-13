@@ -67,6 +67,7 @@ type Transaction {
     createdDate: LocalDate!
     updateDate: LocalDate!
     deletedDate: LocalDate
+    plannedDate: LocalDate!
     receivedDate: LocalDate
     locked: Boolean!
     transactionLines: [TransactionLine]!
@@ -75,7 +76,6 @@ type Transaction {
 type TransactionLine {
     id: Int!
     amount: Int!
-    plannedDate: LocalDate!
     transaction: Transaction!
     item: Item!
 }
@@ -176,10 +176,10 @@ type Mutation {
     createReturnTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
 
     # Adds line to transaction. Default planned date is today.
-    addLineToTransaction(transactionId: Int!, itemId: Int!, amount: Int!, plannedDate: LocalDate): TransactionLine
+    addLineToTransaction(transactionId: Int!, itemId: Int!, amount: Int!): TransactionLine
 
     # Allows you to change properties of the transaction line.
-    changeTransactionLine(TransactionLineId: Int!, itemId: Int, amount: Int, plannedDate: LocalDate): TransactionLine
+    changeTransactionLine(TransactionLineId: Int!, itemId: Int, amount: Int): TransactionLine
 
     # Allows you to change sending- and/or receiving account of transaction.
     changeTransaction(transactionId: Int!, fromAccountId: Int, toAccountId: Int): Transaction

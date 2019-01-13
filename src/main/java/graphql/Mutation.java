@@ -446,7 +446,7 @@ public class Mutation implements GraphQLMutationResolver {
         if (itemId != null && amount != null)
             return createTransactionWithLine(itemId, amount, plannedDate, env, fromAccount, toAccount);
 
-        return transactionRepository.save(new Transaction(fromAccount, toAccount));
+        return transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate));
     }
     
     public Transaction createOrderTransaction(Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env) {
@@ -463,7 +463,7 @@ public class Mutation implements GraphQLMutationResolver {
         if (itemId != null && amount != null)
             return createTransactionWithLine(itemId, amount, plannedDate, env, fromAccount, toAccount);
     
-        return transactionRepository.save(new Transaction(fromAccount, toAccount));
+        return transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate));
     }
 
     
@@ -482,15 +482,14 @@ public class Mutation implements GraphQLMutationResolver {
         if (itemId != null && amount != null)
             return createTransactionWithLine(itemId, amount, plannedDate, env, fromAccount, toAccount);
 
-        return transactionRepository.save(new Transaction(fromAccount, toAccount));
+        return transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate));
     }
 
     private Transaction createTransactionWithLine(
         Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env,
-        Account fromAccount, Account toAccount
-    ) {
-        Transaction transaction = transactionRepository.save(new Transaction(fromAccount, toAccount));
-        addLineToTransaction(transaction.getId(), itemId, amount, plannedDate, env);
+        Account fromAccount, Account toAccount) {
+        Transaction transaction = transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate));
+        addLineToTransaction(transaction.getId(), itemId, amount, env);
 
         return transaction;
     }
@@ -509,6 +508,7 @@ public class Mutation implements GraphQLMutationResolver {
         return transactionRepository.save(transaction);
     }
 
+    //TODO rename to update
     public Transaction changeTransaction(
         Integer transactionId, Integer fromAccountId, Integer toAccountId, DataFetchingEnvironment env
     ) {
@@ -528,7 +528,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public TransactionLine addLineToTransaction(
-        Integer transactionId, Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env
+        Integer transactionId, Integer itemId, Integer amount, DataFetchingEnvironment env
     ) {
         AuthContext.requireAuth(env);
 
@@ -542,11 +542,13 @@ public class Mutation implements GraphQLMutationResolver {
             .findById(itemId)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
 
-        return transactionLineRepository.save(new TransactionLine(amount, transaction, item, plannedDate == null ? LocalDate.now() : plannedDate));
+        return transactionLineRepository.save(new TransactionLine(amount, transaction, item));
     }
 
+
+    //TODO rename to update
     public TransactionLine changeTransactionLine(
-        Integer transactionLineId, Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env
+        Integer transactionLineId, Integer itemId, Integer amount, DataFetchingEnvironment env
     ) {
         AuthContext.requireAuth(env);
 
@@ -564,9 +566,6 @@ public class Mutation implements GraphQLMutationResolver {
 
         if (amount != null)
             transactionLine.setAmount(amount);
-
-        if (plannedDate != null)
-            transactionLine.setPlannedDate(plannedDate);
 
         return transactionLineRepository.save(transactionLine);
     }
