@@ -523,9 +523,8 @@ public class Mutation implements GraphQLMutationResolver {
         return transactionRepository.save(transaction);
     }
 
-    // TODO add PlannedDate
     public Transaction updateTransaction(
-        Integer transactionId, Integer fromAccountId, Integer toAccountId, String description ,DataFetchingEnvironment env
+        Integer transactionId, Integer fromAccountId, Integer toAccountId, LocalDate plannedDate, String description, DataFetchingEnvironment env
     ) {
         AuthContext.requireAuth(env);
 
