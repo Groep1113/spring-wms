@@ -29,6 +29,8 @@ public class Transaction {
 
     private LocalDate deletedDate;
 
+    private LocalDate plannedDate;
+
     private LocalDate receivedDate;
 
     @NotNull
@@ -37,13 +39,15 @@ public class Transaction {
     @OneToMany(mappedBy = "transaction", fetch = FetchType.EAGER)
     private Set<TransactionLine> transactionLines;
 
-    private static final String LOCKED_MESSAGE = "Transaction is locked and therefore, no changes can be made.";
+    @Transient
+    static final String LOCKED_MESSAGE = "Transaction is locked and therefore, no changes can be made.";
 
-    public Transaction(Account fromAccount, Account toAccount) {
+    public Transaction(Account fromAccount, Account toAccount, LocalDate plannedDate) {
         this.fromAccount = fromAccount;
         this.toAccount = toAccount;
         this.createdDate = LocalDate.now();
         this.updateDate = LocalDate.now();
+        this.plannedDate = plannedDate == null ? LocalDate.now() : plannedDate;
         this.locked = false;
     }
 
@@ -92,6 +96,15 @@ public class Transaction {
     public void setDeletedDate(LocalDate deletedDate) {
         this.deletedDate = deletedDate;
         this.updateDate = LocalDate.now();
+    }
+
+    public LocalDate getPlannedDate() {
+        return plannedDate;
+    }
+
+    public void setPlannedDate(LocalDate plannedDate) {
+        if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
+        this.plannedDate = plannedDate;
     }
 
     public LocalDate getReceivedDate() {
