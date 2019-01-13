@@ -127,6 +127,21 @@ public class Mutation implements GraphQLMutationResolver {
         return locationRepository.save(new Location(code, depth, width, height));
     }
 
+    public Location updateLocation(Integer locationId, String code, Integer depth, Integer width, Integer height, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Location location = locationRepository
+                .findById(locationId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
+
+        if (code != null) location.setCode(code);
+        if (depth != null) location.setDepth(depth);
+        if (width != null) location.setWidth(width);
+        if (height != null) location.setHeight(height);
+
+        return locationRepository.save(location);
+    }
+
     public Category createCategory(String name, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
