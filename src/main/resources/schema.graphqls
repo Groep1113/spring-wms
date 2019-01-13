@@ -180,10 +180,10 @@ type Mutation {
     addLineToTransaction(transactionId: Int!, itemId: Int!, amount: Int!): TransactionLine
 
     # Allows you to change properties of the transaction line.
-    changeTransactionLine(TransactionLineId: Int!, itemId: Int, amount: Int): TransactionLine
+    updateTransactionLine(TransactionLineId: Int!, itemId: Int, amount: Int): TransactionLine
 
     # Allows you to change sending- and/or receiving account of transaction.
-    changeTransaction(transactionId: Int!, fromAccountId: Int, toAccountId: Int): Transaction
+    updateTransaction(transactionId: Int!, fromAccountId: Int, toAccountId: Int): Transaction
 
     # Updates the balances and locks the transaction. Also checks if stock wont go below zero before executing.
     executeTransaction(transactionId: Int!): Transaction

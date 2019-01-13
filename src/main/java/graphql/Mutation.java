@@ -523,8 +523,7 @@ public class Mutation implements GraphQLMutationResolver {
         return transactionRepository.save(transaction);
     }
 
-    //TODO rename to update
-    public Transaction changeTransaction(
+    public Transaction updateTransaction(
         Integer transactionId, Integer fromAccountId, Integer toAccountId, DataFetchingEnvironment env
     ) {
         AuthContext.requireAuth(env);
@@ -561,8 +560,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
 
-    //TODO rename to update
-    public TransactionLine changeTransactionLine(
+    public TransactionLine updateTransactionLine(
         Integer transactionLineId, Integer itemId, Integer amount, DataFetchingEnvironment env
     ) {
         AuthContext.requireAuth(env);
