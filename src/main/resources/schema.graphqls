@@ -157,6 +157,7 @@ type Mutation {
     updateUser(id: Int!, firstName: String, lastName: String, email: String, password: String): User
 
     createLocation(code: String!, depth: Int!, width: Int!, height: Int!): Location
+    updateLocation(locationId: Int!, code: String, depth: Int, width: Int, height: Int): Location
     deleteLocation(locationId: Int!): Boolean
 
     createCategory(name: String!): Category
