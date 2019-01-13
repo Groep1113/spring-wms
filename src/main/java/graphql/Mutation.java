@@ -244,14 +244,14 @@ public class Mutation implements GraphQLMutationResolver {
         return attributeRepository.save(attribute);
     }
 
-    public Category categoryChangeName(int id, String name, DataFetchingEnvironment env) {
+    public Category updateCategory(int id, String name, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
         Category category = categoryRepository
             .findById(id)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, Category.class.getSimpleName())));
 
-        category.setName(name);
+        if (name != null) category.setName(name);
         return categoryRepository.save(category);
     }
 

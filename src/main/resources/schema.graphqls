@@ -161,7 +161,7 @@ type Mutation {
 
     createCategory(name: String!): Category
     deleteCategory(categoryId: Int!): Boolean
-    categoryChangeName(categoryId: Int!, name: String!): Category
+    updateCategory(categoryId: Int!, name: String): Category
     categoryAddLocation(categoryId: Int!, locationId: Int!): Category
     categoryRemoveLocation(categoryId: Int!, locationId: Int!): Category
 
