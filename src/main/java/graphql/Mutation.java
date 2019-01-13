@@ -446,7 +446,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Transaction createReservationTransaction(
-        Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env
+        Integer itemId, Integer amount, LocalDate plannedDate, String description, DataFetchingEnvironment env
     ) {
         AuthContext.requireAuth(env);
 
@@ -459,12 +459,12 @@ public class Mutation implements GraphQLMutationResolver {
 
 
         if (itemId != null && amount != null)
-            return createTransactionWithLine(itemId, amount, plannedDate, env, fromAccount, toAccount);
+            return createTransactionWithLine(itemId, amount, plannedDate, description, fromAccount, toAccount, env);
 
-        return transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate));
+        return transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate, description));
     }
     
-    public Transaction createOrderTransaction(Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env) {
+    public Transaction createOrderTransaction(Integer itemId, Integer amount, LocalDate plannedDate, String description, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
     
         Account fromAccount = accountRepository
@@ -476,14 +476,14 @@ public class Mutation implements GraphQLMutationResolver {
     
     
         if (itemId != null && amount != null)
-            return createTransactionWithLine(itemId, amount, plannedDate, env, fromAccount, toAccount);
+            return createTransactionWithLine(itemId, amount, plannedDate, description, fromAccount, toAccount, env);
     
-        return transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate));
+        return transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate, description));
     }
 
     
     public Transaction createReturnTransaction(
-        Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env
+        Integer itemId, Integer amount, LocalDate plannedDate, String description, DataFetchingEnvironment env
     ) {
         AuthContext.requireAuth(env);
 
@@ -495,15 +495,15 @@ public class Mutation implements GraphQLMutationResolver {
             .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)));
 
         if (itemId != null && amount != null)
-            return createTransactionWithLine(itemId, amount, plannedDate, env, fromAccount, toAccount);
+            return createTransactionWithLine(itemId, amount, plannedDate, description, fromAccount, toAccount, env);
 
-        return transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate));
+        return transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate, description));
     }
 
     private Transaction createTransactionWithLine(
-        Integer itemId, Integer amount, LocalDate plannedDate, DataFetchingEnvironment env,
-        Account fromAccount, Account toAccount) {
-        Transaction transaction = transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate));
+        Integer itemId, Integer amount, LocalDate plannedDate, String description,
+        Account fromAccount, Account toAccount, DataFetchingEnvironment env) {
+        Transaction transaction = transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate, description));
         addLineToTransaction(transaction.getId(), itemId, amount, env);
 
         return transaction;
@@ -523,8 +523,9 @@ public class Mutation implements GraphQLMutationResolver {
         return transactionRepository.save(transaction);
     }
 
+    // TODO add PlannedDate
     public Transaction updateTransaction(
-        Integer transactionId, Integer fromAccountId, Integer toAccountId, DataFetchingEnvironment env
+        Integer transactionId, Integer fromAccountId, Integer toAccountId, String description ,DataFetchingEnvironment env
     ) {
         AuthContext.requireAuth(env);
 
@@ -537,6 +538,9 @@ public class Mutation implements GraphQLMutationResolver {
 
         if (toAccountId != null)
             transaction.setToAccount(accountRepository.findById(toAccountId).orElseThrow(() -> new GraphQLException(idNotFoundMessage(toAccountId, Account.class.getSimpleName()))));
+
+        if (description != null)
+            transaction.setDescription(description);
 
         return transactionRepository.save(transaction);
     }

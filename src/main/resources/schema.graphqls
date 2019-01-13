@@ -69,6 +69,7 @@ type Transaction {
     deletedDate: LocalDate
     plannedDate: LocalDate!
     receivedDate: LocalDate
+    description: String
     locked: Boolean!
     transactionLines: [TransactionLine]!
 }
@@ -168,13 +169,13 @@ type Mutation {
     setBalance(balanceId: Int!, amount: Int!, reason: String): Balance
 
     # Transaction that takes items out of the warehouse. Adding a line is optional.
-    createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
+    createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String): Transaction
 
     # Transaction that represents an order from a supplier to the warehouse. Adding a line is optional.
-    createOrderTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
+    createOrderTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String): Transaction
 
     # Transaction that takes items into the warehouse. Adding a line is optional.
-    createReturnTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
+    createReturnTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String): Transaction
 
     # Adds line to transaction. Default planned date is today.
     addLineToTransaction(transactionId: Int!, itemId: Int!, amount: Int!): TransactionLine
@@ -183,7 +184,7 @@ type Mutation {
     updateTransactionLine(TransactionLineId: Int!, itemId: Int, amount: Int): TransactionLine
 
     # Allows you to change sending- and/or receiving account of transaction.
-    updateTransaction(transactionId: Int!, fromAccountId: Int, toAccountId: Int): Transaction
+    updateTransaction(transactionId: Int!, fromAccountId: Int, toAccountId: Int, description: String): Transaction
 
     # Updates the balances and locks the transaction. Also checks if stock wont go below zero before executing.
     executeTransaction(transactionId: Int!): Transaction

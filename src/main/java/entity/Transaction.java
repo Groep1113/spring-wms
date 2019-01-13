@@ -33,6 +33,8 @@ public class Transaction {
 
     private LocalDate receivedDate;
 
+    private String description;
+
     @NotNull
     private Boolean locked;
 
@@ -42,21 +44,14 @@ public class Transaction {
     @Transient
     static final String LOCKED_MESSAGE = "Transaction is locked and therefore, no changes can be made.";
 
-    public Transaction(Account fromAccount, Account toAccount, LocalDate plannedDate) {
+    public Transaction(Account fromAccount, Account toAccount, LocalDate plannedDate, String description) {
         this.fromAccount = fromAccount;
         this.toAccount = toAccount;
         this.createdDate = LocalDate.now();
         this.updateDate = LocalDate.now();
         this.plannedDate = plannedDate == null ? LocalDate.now() : plannedDate;
+        this.description = description;
         this.locked = false;
-    }
-
-    public Transaction(Account fromAccount, Account toAccount, @NotNull LocalDate createdDate, @NotNull LocalDate updateDate, @NotNull Boolean locked) {
-        this.fromAccount = fromAccount;
-        this.toAccount = toAccount;
-        this.createdDate = createdDate;
-        this.updateDate = updateDate;
-        this.locked = locked;
     }
 
     public Transaction() {
@@ -115,6 +110,14 @@ public class Transaction {
         if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
         this.receivedDate = receivedDate;
         this.updateDate = LocalDate.now();
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public Boolean getLocked() {
