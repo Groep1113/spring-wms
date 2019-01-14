@@ -118,7 +118,7 @@ type Query {
     transaction(id: Int!): Transaction
     transactionLines: [TransactionLine]!
     transactionLine(id: Int!): TransactionLine
-    accounts: [Account]!
+    accounts(showDeleted: Boolean): [Account]!
     account(id: Int!): Account
     balances: [Balance]!
     balance(id: Int!): Balance

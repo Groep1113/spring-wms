@@ -171,10 +171,18 @@ public class Query implements GraphQLQueryResolver {
         return accountRepository.findById(id).orElse(null);
     }
 
-    public List<Account> getAccounts(DataFetchingEnvironment env) {
+    public List<Account> getAccounts(Boolean showDeleted, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        return ((List<Account>) accountRepository.findAll());
+        ArrayList<Account> accounts = new ArrayList<>(((List<Account>) accountRepository.findAll()));
+
+        if (showDeleted == null || !showDeleted) {
+            ArrayList<Account> toRemove = new ArrayList<>();
+            for (Account account : accounts) if (account.getDeletedDate() != null) toRemove.add(account);
+            accounts.removeAll(toRemove);
+        }
+
+        return accounts;
     }
 
     public Balance getBalance(Integer id, DataFetchingEnvironment env) {
