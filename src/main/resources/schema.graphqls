@@ -172,13 +172,13 @@ type Mutation {
     setBalance(balanceId: Int!, amount: Int!, reason: String): Balance
 
     # Transaction that takes items out of the warehouse. Adding a line is optional.
-    createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String): Transaction
+    createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, locationId: Int): Transaction
 
     # Transaction that represents an order from a supplier to the warehouse. Adding a line is optional.
-    createOrderTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String): Transaction
+    createOrderTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, locationId: Int): Transaction
 
     # Transaction that takes items into the warehouse. Adding a line is optional.
-    createReturnTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String): Transaction
+    createReturnTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, locationId: Int): Transaction
 
     # Adds line to transaction. Default planned date is today.
     addLineToTransaction(transactionId: Int!, itemId: Int!, amount: Int!): TransactionLine
