@@ -427,13 +427,7 @@ public class Mutation implements GraphQLMutationResolver {
             .findById(itemId)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
 
-        Account account;
-        if (accountId == null)
-            account = accountRepository
-                .findByName(Account.WAREHOUSE)
-                .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)));
-        else
-            account = accountRepository
+        Account account = accountRepository
                 .findById(accountId)
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(accountId, Account.class.getSimpleName())));
 
@@ -512,24 +506,16 @@ public class Mutation implements GraphQLMutationResolver {
         return createTransaction(fromAccount, toAccount, plannedDate, description, itemId, amount, env);
     }
 
-    public Transaction createLocationTransaction(Integer itemId, Integer amount, LocalDate plannedDate, String description, Integer locationId, DataFetchingEnvironment env) {
+    public Transaction createLocationTransaction(Integer itemId, Integer amount, LocalDate plannedDate, String description, Integer fromLocationId, Integer toLocationId, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        Account fromAccount = locationId == null
-                ? accountRepository
-                    .findByName(Account.WAREHOUSE)
-                    .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)))
-                : accountRepository
-                    .findByLocationId(locationId)
-                    .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
+        Account fromAccount = accountRepository
+                .findByLocationId(fromLocationId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(fromLocationId, Location.class.getSimpleName())));
 
-        Account toAccount = locationId == null
-                ? accountRepository
-                    .findByName(Account.WAREHOUSE)
-                    .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)))
-                : accountRepository
-                    .findByLocationId(locationId)
-                    .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
+        Account toAccount = accountRepository
+                .findByLocationId(toLocationId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(toLocationId, Location.class.getSimpleName())));
 
         return createTransaction(fromAccount, toAccount, plannedDate, description, itemId, amount, env);
     }
