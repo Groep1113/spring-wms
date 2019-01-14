@@ -558,7 +558,7 @@ public class Mutation implements GraphQLMutationResolver {
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionId, Transaction.class.getSimpleName())));
 
 
-        // TODO balance checks
+        // TODO balance checks?
         if (fromAccountId != null)
             transaction.setFromAccount(accountRepository.findById(fromAccountId).orElseThrow(() -> new GraphQLException(idNotFoundMessage(fromAccountId, Account.class.getSimpleName()))));
 
@@ -684,6 +684,12 @@ public class Mutation implements GraphQLMutationResolver {
 
         if (transaction.getDeletedDate() != null)
             throw new GraphQLException("This transaction has been deleted, and therefore, can not be executed.");
+
+        if (transaction.getReceivedDate() != null)
+            throw new GraphQLException("This transaction has already been received, and therefore, can not be executed.");
+
+        if (transaction.getLocked())
+            throw new GraphQLException("This transaction is locked, and therefore, can not be executed.");
 
         safeTransactionCheck(transaction);
         processBalanceChanges(transaction);
