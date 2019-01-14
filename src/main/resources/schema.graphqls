@@ -113,7 +113,7 @@ type Query {
     category(id: Int!): Category
 
     # All the parameters are false by default.
-    transactions(showDeleted: Boolean, showOrders: Boolean, showReservations: Boolean, showReturns: Boolean): [Transaction]!
+    transactions(showDeleted: Boolean, showOrders: Boolean, showReservations: Boolean, showReturns: Boolean, showLocation: Boolean): [Transaction]!
 
     transaction(id: Int!): Transaction
     transactionLines: [TransactionLine]!
@@ -165,8 +165,8 @@ type Mutation {
     # Creates an account representing the in-use items. Not keeping track of items outside of the warehouse because it is out-of-scope.
     createInUseAccount: Account
 
-    # Every item in the warehouse needs a balance to see how much of it is in stock. Default account is warehouse.
-    createBalance(itemId: Int!, accountId: Int, amount: Int): Balance
+    # Every item in the warehouse needs a balance to see how much of it is in stock. Default amount is 0.
+    createBalance(itemId: Int!, accountId: Int!, amount: Int): Balance
 
     # Sets the balance to given amount. Creates a balance mutation along with a default reason, if not specified.
     setBalance(balanceId: Int!, amount: Int!): Balance
@@ -179,6 +179,9 @@ type Mutation {
 
     # Transaction that takes items into the warehouse. Adding a line is optional.
     createReturnTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, locationId: Int): Transaction
+
+    # Transaction that moves items between locations inside of the warehouse. Adding a line is optional.
+    createLocationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, fromLocationId: Int!, toLocationId: Int!): Transaction
 
     # Adds line to transaction. Default planned date is today.
     addLineToTransaction(transactionId: Int!, itemId: Int!, amount: Int!): TransactionLine

@@ -136,22 +136,25 @@ public class Query implements GraphQLQueryResolver {
         return transactionRepository.findById(id).orElse(null);
     }
 
-    public List<Transaction> getTransactions(Boolean showDeleted, Boolean showOrders, Boolean showReservations, Boolean showReturns, DataFetchingEnvironment env) {
+    public List<Transaction> getTransactions(Boolean showDeleted, Boolean showOrders, Boolean showReservations, Boolean showReturns, Boolean showLocations, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
         ArrayList<Transaction> transactions = new ArrayList<>();
 
         if (showOrders != null && showOrders) {
-            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountName(Account.SUPPLIER));
+            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.SUPPLIER, Account.WAREHOUSE));
         }
 
         if (showReservations != null && showReservations) {
-            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountName(Account.WAREHOUSE));
+            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.WAREHOUSE, Account.IN_USE));
         }
 
         if (showReturns != null && showReturns) {
-            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountName(Account.IN_USE));
+            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.IN_USE, Account.WAREHOUSE));
         }
+
+        if (showLocations != null || showLocations)
+            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.WAREHOUSE, Account.WAREHOUSE));
 
         if (showDeleted == null || !showDeleted) {
             ArrayList<Transaction> toRemove = new ArrayList<>();
