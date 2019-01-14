@@ -16,6 +16,9 @@ public class Location {
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "locations")
     private Set<Item> items = new HashSet<>();
 
+    @OneToOne(mappedBy = "location")
+    private Account account;
+
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "locations")
     private Set<Category> categories = new HashSet<>();
 
@@ -83,5 +86,13 @@ public class Location {
 
     public void setCategories(Set<Category> categories) {
         this.categories = categories;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
     }
 }

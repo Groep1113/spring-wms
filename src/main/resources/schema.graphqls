@@ -46,6 +46,7 @@ type Location {
     height: Int!
     items: [Item]!
     categories: [Category]!
+    account: Account
 }
 
 type Supplier {
@@ -84,6 +85,8 @@ type TransactionLine {
 type Account {
     id: Int!
     name: String!
+    location: Location
+    deletedDate: LocalDate
 }
 
 type Balance {
