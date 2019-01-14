@@ -322,8 +322,6 @@ public class Mutation implements GraphQLMutationResolver {
         return true;
     }
 
-
-    //TODO set deleted parameter for account.
     public Boolean deleteLocation(int locationId, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
@@ -412,7 +410,7 @@ public class Mutation implements GraphQLMutationResolver {
     public Account createSupplierAccount(DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        return createAccount(Account.IN_USE);
+        return createAccount(Account.SUPPLIER);
     }
 
     private Account createAccount(String name) {
@@ -445,7 +443,7 @@ public class Mutation implements GraphQLMutationResolver {
         return balanceRepository.save(new Balance(account, item, amount == null ? 0 : amount));
     }
 
-    public Balance setBalance(Integer balanceId, Integer amount, String reason, DataFetchingEnvironment env) {
+    public Balance setBalance(Integer balanceId, Integer amount, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
         Balance balance = balanceRepository
@@ -538,21 +536,13 @@ public class Mutation implements GraphQLMutationResolver {
 
     private Transaction createTransaction(Account fromAccount, Account toAccount, LocalDate plannedDate, String description, Integer itemId, Integer amount, DataFetchingEnvironment env) {
         if (itemId != null) {
-            Item item = itemRepository
-                .findById(itemId)
-                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
+            Optional<Item> result = itemRepository.findById(itemId);
+            if (!result.isPresent())
+                throw new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName()));
         }
+
         Transaction transaction = transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate, description));
         if (itemId != null && amount != null) addLineToTransaction(transaction.getId(), itemId, amount, env);
-
-        return transaction;
-    }
-
-    private Transaction createTransactionWithLine(
-        Integer itemId, Integer amount, LocalDate plannedDate, String description,
-        Account fromAccount, Account toAccount, DataFetchingEnvironment env) {
-        Transaction transaction = transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate, description));
-        addLineToTransaction(transaction.getId(), itemId, amount, env);
 
         return transaction;
     }
@@ -580,8 +570,6 @@ public class Mutation implements GraphQLMutationResolver {
             .findById(transactionId)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionId, Transaction.class.getSimpleName())));
 
-
-        // TODO balance checks?
         if (fromAccountId != null)
             transaction.setFromAccount(accountRepository.findById(fromAccountId).orElseThrow(() -> new GraphQLException(idNotFoundMessage(fromAccountId, Account.class.getSimpleName()))));
 
