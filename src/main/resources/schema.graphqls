@@ -133,7 +133,7 @@ type Mutation {
     updateSupplier(name: String!, id: Int!): Supplier
     deleteSupplier(id: Int!): Supplier
 
-    createItem(name: String!, code: String, recommendedStock: Int, locationId: [Int!], categoryId: Int, supplierId: Int): Item
+    createItem(name: String!, code: String, recommendedStock: Int, locationId: [Int!]!, categoryId: [Int!]!, supplierId: Int): Item
     updateItem(itemId: Int!, name: String, code: String, recommendedStock: Int, supplierId: Int): Item
     deleteItem(itemId: Int!): Boolean
     itemAddLocation(itemId: Int!, locationId: Int!): Item
