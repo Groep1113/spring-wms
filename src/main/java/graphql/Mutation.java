@@ -565,6 +565,9 @@ public class Mutation implements GraphQLMutationResolver {
         if (toAccountId != null)
             transaction.setToAccount(accountRepository.findById(toAccountId).orElseThrow(() -> new GraphQLException(idNotFoundMessage(toAccountId, Account.class.getSimpleName()))));
 
+        if (plannedDate != null)
+            transaction.setPlannedDate(plannedDate);
+
         if (description != null)
             transaction.setDescription(description);
 

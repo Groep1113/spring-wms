@@ -89,6 +89,7 @@ public class Transaction {
     }
 
     public void setDeletedDate(LocalDate deletedDate) {
+        if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
         this.deletedDate = deletedDate;
         this.updateDate = LocalDate.now();
     }
@@ -100,6 +101,7 @@ public class Transaction {
     public void setPlannedDate(LocalDate plannedDate) {
         if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
         this.plannedDate = plannedDate;
+        this.updateDate = LocalDate.now();
     }
 
     public LocalDate getReceivedDate() {
@@ -117,7 +119,9 @@ public class Transaction {
     }
 
     public void setDescription(String description) {
+        if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
         this.description = description;
+        this.updateDate = LocalDate.now();
     }
 
     public Boolean getLocked() {
@@ -125,7 +129,9 @@ public class Transaction {
     }
 
     public void setLocked(Boolean locked) {
+        if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
         this.locked = locked;
+        this.updateDate = LocalDate.now();
     }
 
     public Account getFromAccount() {
@@ -134,6 +140,7 @@ public class Transaction {
 
     public void setFromAccount(Account fromAccount) {
         if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
+        this.updateDate = LocalDate.now();
         this.fromAccount = fromAccount;
     }
 
@@ -143,6 +150,7 @@ public class Transaction {
 
     public void setToAccount(Account toAccount) {
         if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
+        this.updateDate = LocalDate.now();
         this.toAccount = toAccount;
     }
 
@@ -151,6 +159,7 @@ public class Transaction {
     }
 
     public void setTransactionLines(Set<TransactionLine> transactionLines) {
+        if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
         this.transactionLines = transactionLines;
     }
 }
