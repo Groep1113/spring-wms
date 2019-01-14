@@ -10,8 +10,7 @@ import org.springframework.stereotype.Component;
 import repository.*;
 
 import java.time.LocalDate;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @SuppressWarnings("unused")
 @Component
@@ -77,13 +76,15 @@ public class Mutation implements GraphQLMutationResolver {
         return new LoginPayload(token, user);
     }
 
-    public Item createItem(String name, String code, Integer recommendedStock, Integer locationId, Integer categoryId, Integer supplierId, DataFetchingEnvironment
+    public Item createItem(String name, String code, Integer recommendedStock, ArrayList<Integer> locationIds, Integer categoryId, Integer supplierId, DataFetchingEnvironment
         env) {
         AuthContext.requireAuth(env);
 
-        Location location = locationId == null ? null : locationRepository
-                .findById(locationId)
-                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
+        Set<Location> locations = new HashSet<>();
+        for (int locationId: locationIds)
+            locations.add(locationRepository
+                    .findById(locationId)
+                    .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName()))));
 
         Category category = categoryId == null ? null : categoryRepository
                 .findById(categoryId)
@@ -97,7 +98,7 @@ public class Mutation implements GraphQLMutationResolver {
             name,
             code,
             recommendedStock,
-            location,
+            locations,
             category,
             supplier
         ));

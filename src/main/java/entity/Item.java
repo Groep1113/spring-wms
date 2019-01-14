@@ -1,6 +1,7 @@
 package entity;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,11 +28,11 @@ public class Item {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private Supplier supplier;
 
-    public Item(String name, String code, Integer recommendedStock, Location location, Category category, Supplier supplier) {
+    public Item(String name, String code, Integer recommendedStock, Set<Location> locations, Category category, Supplier supplier) {
         this.name = name;
         if (code != null) this.code = code;
         if (recommendedStock != null) this.recommendedStock = recommendedStock;
-        if (location != null) locations.add(location);
+        if (locations != null) this.locations = locations;
         if (category != null) categories.add(category);
         if (supplier != null) this.supplier = supplier;
     }
