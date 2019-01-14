@@ -28,12 +28,12 @@ public class Item {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private Supplier supplier;
 
-    public Item(String name, String code, Integer recommendedStock, Set<Location> locations, Category category, Supplier supplier) {
+    public Item(String name, String code, Integer recommendedStock, Set<Location> locations, Set<Category> categories, Supplier supplier) {
         this.name = name;
         if (code != null) this.code = code;
         if (recommendedStock != null) this.recommendedStock = recommendedStock;
         if (locations != null) this.locations = locations;
-        if (category != null) categories.add(category);
+        if (categories != null) this.categories = categories;
         if (supplier != null) this.supplier = supplier;
     }
 

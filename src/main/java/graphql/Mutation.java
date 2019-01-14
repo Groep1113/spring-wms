@@ -76,7 +76,7 @@ public class Mutation implements GraphQLMutationResolver {
         return new LoginPayload(token, user);
     }
 
-    public Item createItem(String name, String code, Integer recommendedStock, ArrayList<Integer> locationIds, Integer categoryId, Integer supplierId, DataFetchingEnvironment
+    public Item createItem(String name, String code, Integer recommendedStock, ArrayList<Integer> locationIds, ArrayList<Integer> categoryIds, Integer supplierId, DataFetchingEnvironment
         env) {
         AuthContext.requireAuth(env);
 
@@ -86,9 +86,11 @@ public class Mutation implements GraphQLMutationResolver {
                     .findById(locationId)
                     .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName()))));
 
-        Category category = categoryId == null ? null : categoryRepository
+        Set<Category> categories = new HashSet<>();
+        for (int categoryId: categoryIds)
+            categories.add(categoryRepository
                 .findById(categoryId)
-                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(categoryId, Category.class.getSimpleName())));
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(categoryId, Category.class.getSimpleName()))));
 
         Supplier supplier = supplierId == null ? null : supplierRepository
                 .findById(supplierId)
@@ -99,7 +101,7 @@ public class Mutation implements GraphQLMutationResolver {
             code,
             recommendedStock,
             locations,
-            category,
+            categories,
             supplier
         ));
     }
