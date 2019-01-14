@@ -527,6 +527,9 @@ public class Mutation implements GraphQLMutationResolver {
                 throw new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName()));
         }
 
+        if (fromAccount.getDeletedDate() != null || toAccount.getDeletedDate() != null)
+            throw new GraphQLException("One or both accounts in this transaction has been set to inactive.");
+
         Transaction transaction = transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate, description));
         if (itemId != null && amount != null) addLineToTransaction(transaction.getId(), itemId, amount, env);
 
@@ -687,6 +690,9 @@ public class Mutation implements GraphQLMutationResolver {
 
         if (transaction.getLocked())
             throw new GraphQLException("This transaction is locked, and therefore, can not be executed.");
+
+        if (transaction.getFromAccount().getDeletedDate() != null || transaction.getToAccount().getDeletedDate() != null)
+            throw new GraphQLException("One or both accounts in this transaction has been set to inactive.");
 
         safeTransactionCheck(transaction);
         processBalanceChanges(transaction);
