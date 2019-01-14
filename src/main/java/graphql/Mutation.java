@@ -121,7 +121,11 @@ public class Mutation implements GraphQLMutationResolver {
     public Location createLocation(String code, int depth, int width, int height, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        return locationRepository.save(new Location(code, depth, width, height));
+        Location location = new Location(code, depth, width, height);
+        locationRepository.save(location);
+        Account account = new Account(Account.WAREHOUSE, location);
+        accountRepository.save(account);
+        return location;
     }
 
     public Location updateLocation(Integer locationId, String code, Integer depth, Integer width, Integer height, DataFetchingEnvironment env) {
@@ -318,12 +322,26 @@ public class Mutation implements GraphQLMutationResolver {
         return true;
     }
 
-    public Boolean deleteLocation(int id, DataFetchingEnvironment env) {
+
+    //TODO set deleted parameter for account.
+    public Boolean deleteLocation(int locationId, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
+        Location location = locationRepository
+                .findById(locationId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
+
+        if (location.getAccount() != null) {
+            Account account = location.getAccount();
+            account.setName(account.getName() + " location: " + location.getCode() + " (deleted)");
+            account.setDeletedDate(LocalDate.now());
+            account.setLocation(null);
+            accountRepository.save(account);
+        }
+
         locationRepository.delete(locationRepository
-            .findById(id)
-            .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, Location.class.getSimpleName()))));
+            .findById(locationId)
+            .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName()))));
         return true;
     }
 
