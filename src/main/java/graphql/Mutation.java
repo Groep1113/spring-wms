@@ -80,6 +80,9 @@ public class Mutation implements GraphQLMutationResolver {
         env) {
         AuthContext.requireAuth(env);
 
+        if (locationIds.isEmpty())
+            throw new GraphQLException("Can not create item without location.");
+
         Set<Location> locations = new HashSet<>();
         for (int locationId: locationIds)
             locations.add(locationRepository
@@ -113,6 +116,8 @@ public class Mutation implements GraphQLMutationResolver {
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
 
         if (locationIds != null) {
+            if (locationIds.isEmpty())
+                throw new GraphQLException("Item must have at least one location.");
             Set<Location> locations = new HashSet<>();
             for (int locationId : locationIds)
                 locations.add(locationRepository
