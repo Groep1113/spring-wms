@@ -457,13 +457,20 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Transaction createReservationTransaction(
-        Integer itemId, Integer amount, LocalDate plannedDate, String description, DataFetchingEnvironment env
+        Integer itemId, Integer amount, LocalDate plannedDate, String description, Integer locationId, DataFetchingEnvironment env
     ) {
         AuthContext.requireAuth(env);
 
-        Account fromAccount = accountRepository
-            .findByName(Account.WAREHOUSE)
-            .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)));
+        Account fromAccount;
+        if (locationId == null) {
+            fromAccount = accountRepository
+                    .findByName(Account.WAREHOUSE)
+                    .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)));
+        } else {
+            fromAccount = accountRepository
+                    .findByLocationId(locationId)
+                    .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
+        }
         Account toAccount = accountRepository
             .findByName(Account.IN_USE)
             .orElseGet(() -> accountRepository.save(new Account(Account.IN_USE)));
@@ -471,31 +478,41 @@ public class Mutation implements GraphQLMutationResolver {
         return createTransaction(fromAccount, toAccount, plannedDate, description, itemId, amount, env);
     }
 
-    public Transaction createOrderTransaction(Integer itemId, Integer amount, LocalDate plannedDate, String description, DataFetchingEnvironment env) {
+    public Transaction createOrderTransaction(Integer itemId, Integer amount, LocalDate plannedDate, String description, Integer locationId, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
+
+        Account toAccount;
     
         Account fromAccount = accountRepository
                 .findByName(Account.SUPPLIER)
                 .orElseGet(() -> accountRepository.save(new Account(Account.SUPPLIER)));
-        Account toAccount = accountRepository
+        toAccount = locationId == null ? accountRepository
                 .findByName(Account.WAREHOUSE)
-                .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)));
+                .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)))
+                : accountRepository
+                .findByLocationId(locationId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
 
         return createTransaction(fromAccount, toAccount, plannedDate, description, itemId, amount, env);
     }
 
     
     public Transaction createReturnTransaction(
-        Integer itemId, Integer amount, LocalDate plannedDate, String description, DataFetchingEnvironment env
+        Integer itemId, Integer amount, LocalDate plannedDate, String description, Integer locationId, DataFetchingEnvironment env
     ) {
         AuthContext.requireAuth(env);
+
+        Account toAccount;
 
         Account fromAccount = accountRepository
             .findByName(Account.IN_USE)
             .orElseGet(() -> accountRepository.save(new Account(Account.IN_USE)));
-        Account toAccount = accountRepository
+        toAccount = locationId == null ? accountRepository
             .findByName(Account.WAREHOUSE)
-            .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)));
+            .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)))
+                : accountRepository
+                .findByLocationId(locationId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
 
         return createTransaction(fromAccount, toAccount, plannedDate, description, itemId, amount, env);
     }
@@ -540,6 +557,8 @@ public class Mutation implements GraphQLMutationResolver {
             .findById(transactionId)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionId, Transaction.class.getSimpleName())));
 
+
+        // TODO balance checks
         if (fromAccountId != null)
             transaction.setFromAccount(accountRepository.findById(fromAccountId).orElseThrow(() -> new GraphQLException(idNotFoundMessage(fromAccountId, Account.class.getSimpleName()))));
 
