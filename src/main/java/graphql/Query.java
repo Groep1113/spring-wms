@@ -94,10 +94,19 @@ public class Query implements GraphQLQueryResolver {
         return ((List<Role>) roleRepository.findAll());
     }
 
-    public List<Item> getItems(DataFetchingEnvironment env) {
+    public List<Item> getItems(Boolean showDeleted, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
+        ArrayList<Item> items = new ArrayList<>(((List<Item>) itemRepository.findAll()));
 
-        return ((List<Item>) itemRepository.findAll());
+        if (showDeleted == null || !showDeleted) {
+            ArrayList<Item> toRemove = new ArrayList<>();
+            for (Item item : items)
+                if (item.getDeletedDate() != null)
+                    toRemove.add(item);
+            items.removeAll(toRemove);
+        }
+
+        return items;
     }
 
     public Item getItem(Integer id, DataFetchingEnvironment env) {

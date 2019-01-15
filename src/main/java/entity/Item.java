@@ -1,7 +1,7 @@
 package entity;
 
 import javax.persistence.*;
-import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -27,6 +27,8 @@ public class Item {
 
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private Supplier supplier;
+
+    private LocalDate deletedDate;
 
     public Item(String name, String code, Integer recommendedStock, Set<Location> locations, Set<Category> categories, Supplier supplier) {
         this.name = name;
@@ -110,5 +112,13 @@ public class Item {
 
     public void setAttributes(Set<Attribute> attributes) {
         this.attributes = attributes;
+    }
+
+    public LocalDate getDeletedDate() {
+        return deletedDate;
+    }
+
+    public void setDeletedDate(LocalDate deletedDate) {
+        this.deletedDate = deletedDate;
     }
 }

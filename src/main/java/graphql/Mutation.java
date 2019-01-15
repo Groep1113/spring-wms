@@ -337,17 +337,15 @@ public class Mutation implements GraphQLMutationResolver {
         throw new GraphQLException("This location (id:" + locationId + ") is not part of this category (id:" + categoryId + "). Therefore, it can not be removed from it.");
     }
 
-    public Boolean deleteItem(int id, DataFetchingEnvironment env) {
+    public Item deleteItem(int itemId, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        if (transactionLineRepository.findAllByItemId(id).iterator().hasNext())
-            throw new GraphQLException("Cant delete item, because it is being referenced by transaction");
-        
-        itemRepository.delete(itemRepository
-            .findById(id)
-            .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, Item.class.getSimpleName()))));
+        Item item = itemRepository
+                .findById(itemId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
 
-        return true;
+        item.setDeletedDate(LocalDate.now());
+        return itemRepository.save(item);
     }
 
     public Boolean deleteLocation(int locationId, DataFetchingEnvironment env) {
