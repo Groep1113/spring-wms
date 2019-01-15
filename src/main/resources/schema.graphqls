@@ -117,7 +117,7 @@ type Query {
     category(id: Int!): Category
 
     # All the parameters are false by default.
-    transactions(showDeleted: Boolean, showOrders: Boolean, showReservations: Boolean, showReturns: Boolean, showLocation: Boolean, showWriteOff: Boolean): [Transaction]!
+    transactions(showDeleted: Boolean, showOrders: Boolean, showReservations: Boolean, showReturns: Boolean, showLocation: Boolean, showWriteOff: Boolean, showManual: Boolean): [Transaction]!
 
     transaction(id: Int!): Transaction
     transactionLines: [TransactionLine]!
@@ -173,7 +173,7 @@ type Mutation {
     createBalance(itemId: Int!, accountId: Int!, amount: Int): Balance
 
     # Sets the balance to given amount. Creates a balance mutation along with a default reason, if not specified.
-    setBalance(balanceId: Int!, amount: Int!): Balance
+    updateBalance(balanceId: Int!, amount: Int!, description: String): Balance
 
     # Transaction that takes items out of the warehouse. Adding a line is optional.
     createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, locationId: Int): Transaction

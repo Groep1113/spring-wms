@@ -463,17 +463,6 @@ public class Mutation implements GraphQLMutationResolver {
         return balanceRepository.save(new Balance(account, item, amount == null ? 0 : amount));
     }
 
-    public Balance setBalance(Integer balanceId, Integer amount, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
-
-        Balance balance = balanceRepository
-            .findById(balanceId)
-            .orElseThrow(() -> new GraphQLException(idNotFoundMessage(balanceId, Balance.class.getSimpleName())));
-        balance.setAmount(amount);
-
-        return balance;
-    }
-
     public Transaction createReservationTransaction(
         Integer itemId, Integer amount, LocalDate plannedDate, String description, Integer locationId, DataFetchingEnvironment env
     ) {
@@ -547,6 +536,56 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Transaction createWriteOffTransaction(Integer itemId, Integer amount, LocalDate plannedDate, String description, Integer locationId, DataFetchingEnvironment env){
+        AuthContext.requireAuth(env);
+
+        Account fromAccount = locationId == null
+                ? accountRepository
+                .findByName(Account.WAREHOUSE)
+                .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)))
+                : accountRepository
+                .findByLocationId(locationId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
+
+        Account toAccount = accountRepository
+                .findByName(Account.WRITE_OFF)
+                .orElseGet(() -> accountRepository.save(new Account(Account.WRITE_OFF)));
+
+        return createTransaction(fromAccount, toAccount, plannedDate, description, itemId, amount, env);
+    }
+
+    public Balance updateBalance(Integer balanceId, int amount, String description, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        Balance balance = balanceRepository
+                .findById(balanceId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(balanceId, Balance.class.getSimpleName())));
+
+        int current_amount = balance.getAmount();
+
+        int transaction_amount;
+        Account fromAccount;
+        Account toAccount;
+        if (current_amount > amount) {
+            transaction_amount = current_amount - amount;
+            fromAccount = balance.getAccount();
+            toAccount = accountRepository
+                    .findByName(Account.MANUAL)
+                    .orElseGet(() -> accountRepository.save(new Account(Account.MANUAL)));
+        } else {
+            transaction_amount = amount - current_amount;
+            fromAccount = accountRepository
+                    .findByName(Account.MANUAL)
+                    .orElseGet(() -> accountRepository.save(new Account(Account.MANUAL)));
+            toAccount = balance.getAccount();
+        }
+
+        Transaction transaction = createTransaction(fromAccount, toAccount, null, description == null ? "Handmatige aanpassing" : description, balance.getItem().getId(), transaction_amount, env);
+        executeTransaction(transaction.getId(), env);
+
+        return balance;
+    }
+
+    public Transaction createManualSubtractTransaction(Integer itemId, Integer amount, LocalDate plannedDate, String description, Integer locationId, DataFetchingEnvironment env){
         AuthContext.requireAuth(env);
 
         Account fromAccount = locationId == null
