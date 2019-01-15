@@ -172,4 +172,8 @@ public class Transaction {
     public Set<TransactionMutation> getTransactionMutations() {
         return transactionMutations;
     }
+
+    public void setTransactionMutations(Set<TransactionMutation> transactionMutations) {
+        this.transactionMutations = transactionMutations;
+    }
 }
