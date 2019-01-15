@@ -1,10 +1,7 @@
 package entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import java.time.LocalDate;
+import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 public class TransactionMutation  {
@@ -13,11 +10,24 @@ public class TransactionMutation  {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    private LocalDate date;
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Transaction transaction;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    private User user;
+
+    private LocalDateTime date;
 
     private String description;
 
     public TransactionMutation() {
+    }
+
+    public TransactionMutation(Transaction transaction, User user, LocalDateTime date, String description) {
+        this.transaction = transaction;
+        this.user = user;
+        this.date = date;
+        this.description = description;
     }
 
     public Integer getId() {
@@ -28,11 +38,27 @@ public class TransactionMutation  {
         this.id = id;
     }
 
-    public LocalDate getDate() {
+    public Transaction getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public LocalDateTime getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(LocalDateTime date) {
         this.date = date;
     }
 

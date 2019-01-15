@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import repository.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @SuppressWarnings("unused")
@@ -27,6 +28,7 @@ public class Mutation implements GraphQLMutationResolver {
     private AccountRepository accountRepository;
     private BalanceRepository balanceRepository;
     private AttributeRepository attributeRepository;
+    private TransactionMutationRepository transactionMutationRepository;
 
     @Autowired
     public Mutation(
@@ -40,7 +42,8 @@ public class Mutation implements GraphQLMutationResolver {
         TransactionLineRepository transactionLineRepository,
         AccountRepository accountRepository,
         BalanceRepository balanceRepository,
-        AttributeRepository attributeRepository
+        AttributeRepository attributeRepository,
+        TransactionMutationRepository transactionMutationRepository
     ) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
@@ -53,6 +56,7 @@ public class Mutation implements GraphQLMutationResolver {
         this.accountRepository = accountRepository;
         this.balanceRepository = balanceRepository;
         this.attributeRepository = attributeRepository;
+        this.transactionMutationRepository = transactionMutationRepository;
     }
 
     private String idNotFoundMessage(int id, String entity) {
@@ -616,6 +620,8 @@ public class Mutation implements GraphQLMutationResolver {
         Transaction transaction = transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate, description));
         if (itemId != null && amount != null) addLineToTransaction(transaction.getId(), itemId, amount, env);
 
+        transactionMutationRepository.save(new TransactionMutation(transaction, (((AuthContext) env.getContext()).getUser()), LocalDateTime.now(), "Created"));
+
         return transaction;
     }
 
@@ -630,6 +636,8 @@ public class Mutation implements GraphQLMutationResolver {
             throw new GraphQLException("This transaction was already deleted on " + transaction.getDeletedDate() + ".");
         transaction.setDeletedDate(LocalDate.now());
 
+        transactionMutationRepository.save(new TransactionMutation(transaction, (((AuthContext) env.getContext()).getUser()), LocalDateTime.now(), "Deleted"));
+
         return transactionRepository.save(transaction);
     }
 
@@ -642,17 +650,46 @@ public class Mutation implements GraphQLMutationResolver {
             .findById(transactionId)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionId, Transaction.class.getSimpleName())));
 
-        if (fromAccountId != null)
+        if (fromAccountId != null) {
+            transactionMutationRepository
+                    .save(new TransactionMutation(
+                            transaction,
+                            (((AuthContext) env.getContext()).getUser()),
+                            LocalDateTime.now(),
+                            "Updated fromAcount " + transaction.getFromAccount().getId() + " -> " + fromAccountId));
             transaction.setFromAccount(accountRepository.findById(fromAccountId).orElseThrow(() -> new GraphQLException(idNotFoundMessage(fromAccountId, Account.class.getSimpleName()))));
+        }
 
-        if (toAccountId != null)
+        if (toAccountId != null) {
+            transactionMutationRepository
+                    .save(new TransactionMutation(
+                            transaction,
+                            (((AuthContext) env.getContext()).getUser()),
+                            LocalDateTime.now(),
+                            "Updated toAcount " + transaction.getToAccount().getId() + " -> " + toAccountId));
             transaction.setToAccount(accountRepository.findById(toAccountId).orElseThrow(() -> new GraphQLException(idNotFoundMessage(toAccountId, Account.class.getSimpleName()))));
+        }
 
-        if (plannedDate != null)
+        if (plannedDate != null) {
+            transactionMutationRepository
+                    .save(new TransactionMutation(
+                            transaction,
+                            (((AuthContext) env.getContext()).getUser()),
+                            LocalDateTime.now(),
+                            "Updated plannedDate " + transaction.getPlannedDate() + " -> " + plannedDate));
             transaction.setPlannedDate(plannedDate);
+        }
 
-        if (description != null)
+        if (description != null) {
+            transactionMutationRepository
+                    .save(new TransactionMutation(
+                            transaction,
+                            (((AuthContext) env.getContext()).getUser()),
+                            LocalDateTime.now(),
+                            "Updated description " + transaction.getDescription() + " -> " + description));
             transaction.setDescription(description);
+        }
+
 
         return transactionRepository.save(transaction);
     }
@@ -672,7 +709,17 @@ public class Mutation implements GraphQLMutationResolver {
             .findById(itemId)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
 
-        return transactionLineRepository.save(new TransactionLine(amount, transaction, item));
+        TransactionLine transactionLine = transactionLineRepository.save(new TransactionLine(amount, transaction, item));
+
+        if (!transaction.getTransactionLines().isEmpty())
+        transactionMutationRepository
+                .save(new TransactionMutation(
+                        transaction,
+                        (((AuthContext) env.getContext()).getUser()),
+                        LocalDateTime.now(),
+                        "Added transaction line " + transactionLine.getId()));
+
+        return transactionLine;
     }
 
 
@@ -688,19 +735,44 @@ public class Mutation implements GraphQLMutationResolver {
         if (transactionLine.getTransaction().getLocked())
             throw new GraphQLException("The transaction linked to this line is locked, and therefore, can not be changed.");
 
-        if (itemId != null)
+        if (itemId != null) {
+            transactionMutationRepository
+                    .save(new TransactionMutation(
+                            transactionLine.getTransaction(),
+                            (((AuthContext) env.getContext()).getUser()),
+                            LocalDateTime.now(),
+                            "Updated itemId " + transactionLine.getItem().getId() + " -> " + itemId));
             transactionLine.setItem(itemRepository
-                .findById(itemId)
-                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName()))));
+                    .findById(itemId)
+                    .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName()))));
+        }
 
-        if (amount != null)
+        if (amount != null) {
+            transactionMutationRepository
+                    .save(new TransactionMutation(
+                            transactionLine.getTransaction(),
+                            (((AuthContext) env.getContext()).getUser()),
+                            LocalDateTime.now(),
+                            "Updated amount " + transactionLine.getAmount() + " -> " + amount));
             transactionLine.setAmount(amount);
+        }
 
         return transactionLineRepository.save(transactionLine);
     }
 
     public Boolean deleteTransactionLine(Integer transactionLineId, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
+
+        TransactionLine transactionLine = transactionLineRepository
+                .findById(transactionLineId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionLineId, TransactionLine.class.getSimpleName())));
+
+        transactionMutationRepository
+                .save(new TransactionMutation(
+                        transactionLine.getTransaction(),
+                        (((AuthContext) env.getContext()).getUser()),
+                        LocalDateTime.now(),
+                        "Removed transaction line " + transactionLine.getId()));
 
         transactionLineRepository.deleteById(transactionLineId);
         return true;
@@ -779,6 +851,13 @@ public class Mutation implements GraphQLMutationResolver {
 
         safeTransactionCheck(transaction);
         processBalanceChanges(transaction);
+
+        transactionMutationRepository
+                .save(new TransactionMutation(
+                        transaction,
+                        (((AuthContext) env.getContext()).getUser()),
+                        LocalDateTime.now(),
+                        "Executed"));
 
         transaction.setReceivedDate(LocalDate.now());
         transaction.setLocked(true);

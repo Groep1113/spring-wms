@@ -259,9 +259,12 @@ public class Query implements GraphQLQueryResolver {
         return transactionMutationRepository.findById(id).orElse(null);
     }
 
-    public List<TransactionMutation> getTransactionMutations(DataFetchingEnvironment env) {
+    public List<TransactionMutation> getTransactionMutations(Integer transactionId, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        return ((List<TransactionMutation>) transactionMutationRepository.findAll());
+        if (transactionId != null){
+            return ((List<TransactionMutation>) transactionMutationRepository.findAllByTransactionId(transactionId));
+        } else
+            return ((List<TransactionMutation>) transactionMutationRepository.findAll());
     }
 }

@@ -5,6 +5,7 @@ type Role {
 }
 
 scalar LocalDate
+scalar LocalDateTime
 
 type User {
     id: Int!
@@ -99,6 +100,8 @@ type Balance {
 
 type TransactionMutation {
     id: Int!
+    transaction: Transaction!
+    user: User!
     date: String!
     description: String!
 }
@@ -129,7 +132,7 @@ type Query {
     transactionLines: [TransactionLine]!
     transactionLine(id: Int!): TransactionLine
     transactionMutation(id: Int!): TransactionMutation
-    transactionMutations: [TransactionMutation]!
+    transactionMutations(transactionId: Int): [TransactionMutation]!
     accounts(showDeleted: Boolean): [Account]!
     account(id: Int!): Account
     balances: [Balance]!
