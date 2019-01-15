@@ -72,3 +72,20 @@ docker-compose down
 ```
 
 De applicatie gebruikt vanuit Docker de poorten 3306, 8080 en 9000. Zorg dat je deze poorten vrij hebt voor je het opstart.
+
+Andere handige commando's:
+
+- Nieuwe images pullen van Docker Hub. 
+```bash
+docker-compose pull
+```
+
+- Alle images en containers van Docker verwijderen. Een reset-knop, eigenlijk.
+```bash
+docker system prune -a
+```
+
+- Alle containers bekijken.
+```bash
+docker ps -a
+```
