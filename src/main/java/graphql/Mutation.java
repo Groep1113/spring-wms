@@ -546,6 +546,24 @@ public class Mutation implements GraphQLMutationResolver {
         return createTransaction(fromAccount, toAccount, plannedDate, description, itemId, amount, env);
     }
 
+    public Transaction createWriteOffTransaction(Integer itemId, Integer amount, LocalDate plannedDate, String description, Integer locationId, DataFetchingEnvironment env){
+        AuthContext.requireAuth(env);
+
+        Account fromAccount = locationId == null
+                ? accountRepository
+                .findByName(Account.WAREHOUSE)
+                .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)))
+                : accountRepository
+                .findByLocationId(locationId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
+
+        Account toAccount = accountRepository
+                .findByName(Account.WRITE_OFF)
+                .orElseGet(() -> accountRepository.save(new Account(Account.WRITE_OFF)));
+
+        return createTransaction(fromAccount, toAccount, plannedDate, description, itemId, amount, env);
+    }
+
     private Transaction createTransaction(Account fromAccount, Account toAccount, LocalDate plannedDate, String description, Integer itemId, Integer amount, DataFetchingEnvironment env) {
         if (itemId != null) {
             Optional<Item> result = itemRepository.findById(itemId);

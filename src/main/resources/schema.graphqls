@@ -117,7 +117,7 @@ type Query {
     category(id: Int!): Category
 
     # All the parameters are false by default.
-    transactions(showDeleted: Boolean, showOrders: Boolean, showReservations: Boolean, showReturns: Boolean, showLocation: Boolean): [Transaction]!
+    transactions(showDeleted: Boolean, showOrders: Boolean, showReservations: Boolean, showReturns: Boolean, showLocation: Boolean, showWriteOff: Boolean): [Transaction]!
 
     transaction(id: Int!): Transaction
     transactionLines: [TransactionLine]!
@@ -186,6 +186,9 @@ type Mutation {
 
     # Transaction that moves items between locations inside of the warehouse. Adding a line is optional.
     createLocationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, fromLocationId: Int!, toLocationId: Int!): Transaction
+
+    # Transaction used to dispose items in the warehouse. Adding a line is optional.
+    createWriteOffTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, locationId: Int): Transaction
 
     # Adds line to transaction. Default planned date is today.
     addLineToTransaction(transactionId: Int!, itemId: Int!, amount: Int!): TransactionLine

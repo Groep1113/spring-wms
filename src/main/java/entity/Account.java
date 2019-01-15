@@ -10,6 +10,7 @@ public class Account {
     public static final String WAREHOUSE = "Warehouse";
     public static final String IN_USE = "In use";
     public static final String SUPPLIER = "Supplier";
+    public static final String WRITE_OFF = "Write off";
 
     @Id
     @GeneratedValue

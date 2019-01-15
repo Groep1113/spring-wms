@@ -145,7 +145,7 @@ public class Query implements GraphQLQueryResolver {
         return transactionRepository.findById(id).orElse(null);
     }
 
-    public List<Transaction> getTransactions(Boolean showDeleted, Boolean showOrders, Boolean showReservations, Boolean showReturns, Boolean showLocations, DataFetchingEnvironment env) {
+    public List<Transaction> getTransactions(Boolean showDeleted, Boolean showOrders, Boolean showReservations, Boolean showReturns, Boolean showLocations, Boolean showWriteOff, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
         ArrayList<Transaction> transactions = new ArrayList<>();
@@ -162,8 +162,11 @@ public class Query implements GraphQLQueryResolver {
             transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.IN_USE, Account.WAREHOUSE));
         }
 
-        if (showLocations != null || showLocations)
+        if (showLocations != null && showLocations)
             transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.WAREHOUSE, Account.WAREHOUSE));
+
+        if (showWriteOff != null && showWriteOff)
+            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.WAREHOUSE, Account.WRITE_OFF));
 
         if (showDeleted == null || !showDeleted) {
             ArrayList<Transaction> toRemove = new ArrayList<>();
