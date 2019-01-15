@@ -1,7 +1,10 @@
 package entity;
 
 
+import graphql.AuthContext;
 import graphql.GraphQLException;
+import graphql.schema.DataFetchingEnvironment;
+import repository.TransactionMutationRepository;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -34,6 +37,9 @@ public class Transaction {
     private LocalDate receivedDate;
 
     private String description;
+
+    @OneToMany(mappedBy = "transaction", fetch = FetchType.EAGER)
+    private Set<TransactionMutation> transactionMutations;
 
     @NotNull
     private Boolean locked;
@@ -161,5 +167,9 @@ public class Transaction {
     public void setTransactionLines(Set<TransactionLine> transactionLines) {
         if (this.locked) throw new GraphQLException(LOCKED_MESSAGE);
         this.transactionLines = transactionLines;
+    }
+
+    public Set<TransactionMutation> getTransactionMutations() {
+        return transactionMutations;
     }
 }
