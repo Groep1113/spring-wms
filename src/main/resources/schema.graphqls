@@ -97,6 +97,12 @@ type Balance {
     account: Account!
 }
 
+type TransactionMutation {
+    id: Int!
+    date: String!
+    description: String!
+}
+
 type Query {
     users: [User]!
     userByMail(email: String!): User
@@ -122,6 +128,8 @@ type Query {
     transaction(id: Int!): Transaction
     transactionLines: [TransactionLine]!
     transactionLine(id: Int!): TransactionLine
+    transactionMutation(id: Int!): TransactionMutation
+    transactionMutations: [TransactionMutation]!
     accounts(showDeleted: Boolean): [Account]!
     account(id: Int!): Account
     balances: [Balance]!
