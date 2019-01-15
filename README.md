@@ -61,7 +61,7 @@ Voordat je met Docker de applicatie kan starten, moet je eenmalig het volgende d
 - Kopieer de inhoud van `.env.example` naar `.env`.
 - Vul de gegevens vervolgens aan in `.env` naar eigen keuze, zoals wachtwoord, rootwachtwoord, username en databaseschema.
 
-Daarna kan je met [ Docker Compose ](https://docs.docker.com/compose/install/) de applicatie starten. De applicatie gebruikt vanuit Docker de poorten 3306, 8080 en 9000. Zorg dat je deze poorten vrij hebt voor je het opstart.
+Daarna kan je met [ Docker Compose ](https://docs.docker.com/compose/install/) de applicatie starten. De applicatie gebruikt vanuit Docker de poorten 3306, 80 en 9000. Zorg dat je deze poorten vrij hebt voor je het opstart.
 ```bash
 docker-compose up
 ```
