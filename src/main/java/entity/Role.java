@@ -5,6 +5,10 @@ import java.util.Set;
 
 @Entity // This tells Hibernate to make a table out of this class
 public class Role {
+
+    public static final String ADMIN = "admin";
+    public static final String WAREHOUSE_MANAGER = "warehouse manager";
+
     // fields
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
