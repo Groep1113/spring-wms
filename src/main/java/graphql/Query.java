@@ -8,7 +8,9 @@ import org.springframework.stereotype.Component;
 import repository.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 @Component
@@ -145,7 +147,16 @@ public class Query implements GraphQLQueryResolver {
     public Transaction getTransaction(Integer id, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        return transactionRepository.findById(id).orElse(null);
+        Transaction transaction = transactionRepository.findById(id).orElse(null);
+
+        if (transaction != null && transaction.getFromAccount().getName().equals(Account.SUPPLIER) && transaction.getToAccount().getName().equals(Account.WAREHOUSE)){
+            Set<String> authorizedRoles = new HashSet<>();
+            authorizedRoles.add(Role.ADMIN);
+            authorizedRoles.add(Role.WAREHOUSE_MANAGER);
+            AuthContext.requireAuth(env, authorizedRoles);
+        }
+
+        return transaction;
     }
 
     public List<Transaction> getTransactions(Boolean showDeleted, Boolean showOrders, Boolean showReservations, Boolean showReturns, Boolean showLocations, Boolean showWriteOff, Boolean showManual, DataFetchingEnvironment env) {
@@ -154,6 +165,10 @@ public class Query implements GraphQLQueryResolver {
         ArrayList<Transaction> transactions = new ArrayList<>();
 
         if (showOrders != null && showOrders) {
+            Set<String> authorizedRoles = new HashSet<>();
+            authorizedRoles.add(Role.ADMIN);
+            authorizedRoles.add(Role.WAREHOUSE_MANAGER);
+            AuthContext.requireAuth(env, authorizedRoles);
             transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.SUPPLIER, Account.WAREHOUSE));
         }
 

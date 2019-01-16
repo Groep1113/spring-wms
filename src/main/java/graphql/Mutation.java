@@ -385,7 +385,9 @@ public class Mutation implements GraphQLMutationResolver {
     public User createUser(
         String firstName, String lastName, String email, String password, DataFetchingEnvironment env
     ) {
-        AuthContext.requireAuth(env);
+        Set<String> authorizedRoles = new HashSet<>();
+        authorizedRoles.add("admin");
+        AuthContext.requireAuth(env, authorizedRoles);
 
         User user = new User();
         user.setFirstName(firstName);
@@ -487,7 +489,10 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Transaction createOrderTransaction(Integer itemId, Integer amount, LocalDate plannedDate, String description, Integer locationId, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        Set<String> authorizedRoles = new HashSet<>();
+        authorizedRoles.add(Role.ADMIN);
+        authorizedRoles.add(Role.WAREHOUSE_MANAGER);
+        AuthContext.requireAuth(env, authorizedRoles);
 
         Account fromAccount = accountRepository
                 .findByName(Account.SUPPLIER)
