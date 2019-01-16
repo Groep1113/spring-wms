@@ -1,11 +1,12 @@
 package entity;
 
+import graphql.GraphQLException;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDate;
 
 @Entity
-public class TransactionRule {
+public class TransactionLine {
 
     @Id
     @GeneratedValue
@@ -14,24 +15,20 @@ public class TransactionRule {
     @NotNull
     private Integer amount;
 
-    private LocalDate plannedDate;
-
-    private LocalDate actualDate;
-
     @ManyToOne
     private Transaction transaction;
 
     @OneToOne
     private Item item;
 
-    public TransactionRule(@NotNull Integer amount, Transaction transaction, Item item, LocalDate plannedDate) {
+    public TransactionLine(@NotNull Integer amount, Transaction transaction, Item item) {
+        if (transaction.getLocked()) throw new GraphQLException(Transaction.LOCKED_MESSAGE);
         this.amount = amount;
         this.transaction = transaction;
         this.item = item;
-        this.plannedDate = plannedDate;
     }
 
-    public TransactionRule() {
+    public TransactionLine() {
     }
 
     public Integer getId() {
@@ -48,22 +45,6 @@ public class TransactionRule {
 
     public void setAmount(Integer amount) {
         this.amount = amount;
-    }
-
-    public LocalDate getPlannedDate() {
-        return plannedDate;
-    }
-
-    public void setPlannedDate(LocalDate plannedDate) {
-        this.plannedDate = plannedDate;
-    }
-
-    public LocalDate getActualDate() {
-        return actualDate;
-    }
-
-    public void setActualDate(LocalDate actualDate) {
-        this.actualDate = actualDate;
     }
 
     public Transaction getTransaction() {

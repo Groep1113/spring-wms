@@ -1,6 +1,7 @@
 package entity;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,15 +22,20 @@ public class Item {
     @JoinTable
     private Set<Category> categories = new HashSet<>();
 
+    @OneToMany(mappedBy = "item", fetch = FetchType.EAGER)
+    private Set<Attribute> attributes = new HashSet<>();
+
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     private Supplier supplier;
 
-    public Item(String name, String code, Integer recommendedStock, Location location, Category category, Supplier supplier) {
+    private LocalDate deletedDate;
+
+    public Item(String name, String code, Integer recommendedStock, Set<Location> locations, Set<Category> categories, Supplier supplier) {
         this.name = name;
         if (code != null) this.code = code;
         if (recommendedStock != null) this.recommendedStock = recommendedStock;
-        if (location != null) locations.add(location);
-        if (category != null) categories.add(category);
+        if (locations != null) this.locations = locations;
+        if (categories != null) this.categories = categories;
         if (supplier != null) this.supplier = supplier;
     }
 
@@ -98,5 +104,21 @@ public class Item {
 
     public void setSupplier(Supplier supplier) {
         this.supplier = supplier;
+    }
+
+    public Set<Attribute> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Set<Attribute> attributes) {
+        this.attributes = attributes;
+    }
+
+    public LocalDate getDeletedDate() {
+        return deletedDate;
+    }
+
+    public void setDeletedDate(LocalDate deletedDate) {
+        this.deletedDate = deletedDate;
     }
 }

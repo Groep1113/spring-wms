@@ -8,7 +8,9 @@ import org.springframework.stereotype.Component;
 import repository.*;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @SuppressWarnings("unused")
 @Component
@@ -21,10 +23,11 @@ public class Query implements GraphQLQueryResolver {
     private LocationRepository locationRepository;
     private CategoryRepository categoryRepository;
     private TransactionRepository transactionRepository;
-    private TransactionRuleRepository transactionRuleRepository;
+    private TransactionLineRepository transactionLineRepository;
     private AccountRepository accountRepository;
     private BalanceRepository balanceRepository;
-    private BalanceMutationRepository balanceMutationRepository;
+    private AttributeRepository attributeRepository;
+    private TransactionMutationRepository transactionMutationRepository;
 
     @Autowired
     public Query(UserRepository userRepository,
@@ -34,10 +37,11 @@ public class Query implements GraphQLQueryResolver {
                  LocationRepository locationRepository,
                  CategoryRepository categoryRepository,
                  TransactionRepository transactionRepository,
-                 TransactionRuleRepository transactionRuleRepository,
+                 TransactionLineRepository transactionLineRepository,
                  AccountRepository accountRepository,
                  BalanceRepository balanceRepository,
-                 BalanceMutationRepository balanceMutationRepository) {
+                 AttributeRepository attributeRepository,
+                 TransactionMutationRepository transactionMutationRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.supplierRepository = supplierRepository;
@@ -45,10 +49,11 @@ public class Query implements GraphQLQueryResolver {
         this.locationRepository = locationRepository;
         this.categoryRepository = categoryRepository;
         this.transactionRepository = transactionRepository;
-        this.transactionRuleRepository = transactionRuleRepository;
+        this.transactionLineRepository = transactionLineRepository;
         this.accountRepository = accountRepository;
         this.balanceRepository = balanceRepository;
-        this.balanceMutationRepository = balanceMutationRepository;
+        this.attributeRepository = attributeRepository;
+        this.transactionMutationRepository = transactionMutationRepository;
     }
 
     // These method names have to line up with the schema.graphqls field definitions
@@ -94,10 +99,19 @@ public class Query implements GraphQLQueryResolver {
         return ((List<Role>) roleRepository.findAll());
     }
 
-    public List<Item> getItems(DataFetchingEnvironment env) {
+    public List<Item> getItems(Boolean showDeleted, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
+        ArrayList<Item> items = new ArrayList<>(((List<Item>) itemRepository.findAll()));
 
-        return ((List<Item>) itemRepository.findAll());
+        if (showDeleted == null || !showDeleted) {
+            ArrayList<Item> toRemove = new ArrayList<>();
+            for (Item item : items)
+                if (item.getDeletedDate() != null)
+                    toRemove.add(item);
+            items.removeAll(toRemove);
+        }
+
+        return items;
     }
 
     public Item getItem(Integer id, DataFetchingEnvironment env) {
@@ -133,24 +147,48 @@ public class Query implements GraphQLQueryResolver {
     public Transaction getTransaction(Integer id, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        return transactionRepository.findById(id).orElse(null);
+        Transaction transaction = transactionRepository.findById(id).orElse(null);
+
+        if (transaction != null && transaction.getFromAccount().getName().equals(Account.SUPPLIER) && transaction.getToAccount().getName().equals(Account.WAREHOUSE)){
+            Set<String> authorizedRoles = new HashSet<>();
+            authorizedRoles.add(Role.ADMIN);
+            authorizedRoles.add(Role.WAREHOUSE_MANAGER);
+            AuthContext.requireAuth(env, authorizedRoles);
+        }
+
+        return transaction;
     }
 
-    public List<Transaction> getTransactions(Boolean showDeleted, Boolean showOrders, Boolean showReservations, Boolean showReturns, DataFetchingEnvironment env) {
+    public List<Transaction> getTransactions(Boolean showDeleted, Boolean showOrders, Boolean showReservations, Boolean showReturns, Boolean showLocations, Boolean showWriteOff, Boolean showManual, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
         ArrayList<Transaction> transactions = new ArrayList<>();
 
         if (showOrders != null && showOrders) {
-            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountName(Account.SUPPLIER));
+            Set<String> authorizedRoles = new HashSet<>();
+            authorizedRoles.add(Role.ADMIN);
+            authorizedRoles.add(Role.WAREHOUSE_MANAGER);
+            AuthContext.requireAuth(env, authorizedRoles);
+            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.SUPPLIER, Account.WAREHOUSE));
         }
 
         if (showReservations != null && showReservations) {
-            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountName(Account.WAREHOUSE));
+            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.WAREHOUSE, Account.IN_USE));
         }
 
         if (showReturns != null && showReturns) {
-            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountName(Account.IN_USE));
+            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.IN_USE, Account.WAREHOUSE));
+        }
+
+        if (showLocations != null && showLocations)
+            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.WAREHOUSE, Account.WAREHOUSE));
+
+        if (showWriteOff != null && showWriteOff)
+            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.WAREHOUSE, Account.WRITE_OFF));
+
+        if (showManual != null && showManual) {
+            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.WAREHOUSE, Account.MANUAL));
+            transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.MANUAL, Account.WAREHOUSE));
         }
 
         if (showDeleted == null || !showDeleted) {
@@ -168,10 +206,18 @@ public class Query implements GraphQLQueryResolver {
         return accountRepository.findById(id).orElse(null);
     }
 
-    public List<Account> getAccounts(DataFetchingEnvironment env) {
+    public List<Account> getAccounts(Boolean showDeleted, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        return ((List<Account>) accountRepository.findAll());
+        ArrayList<Account> accounts = new ArrayList<>(((List<Account>) accountRepository.findAll()));
+
+        if (showDeleted == null || !showDeleted) {
+            ArrayList<Account> toRemove = new ArrayList<>();
+            for (Account account : accounts) if (account.getDeletedDate() != null) toRemove.add(account);
+            accounts.removeAll(toRemove);
+        }
+
+        return accounts;
     }
 
     public Balance getBalance(Integer id, DataFetchingEnvironment env) {
@@ -186,28 +232,16 @@ public class Query implements GraphQLQueryResolver {
         return ((List<Balance>) balanceRepository.findAll());
     }
 
-    public BalanceMutation getBalanceMutation(Integer id, DataFetchingEnvironment env) {
+    public TransactionLine getTransactionLine(Integer id, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        return balanceMutationRepository.findById(id).orElse(null);
+        return transactionLineRepository.findById(id).orElse(null);
     }
 
-    public List<BalanceMutation> getBalanceMutations(DataFetchingEnvironment env) {
+    public List<TransactionLine> getTransactionLines(DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
-        return ((List<BalanceMutation>) balanceMutationRepository.findAll());
-    }
-
-    public TransactionRule getTransactionRule(Integer id, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
-
-        return transactionRuleRepository.findById(id).orElse(null);
-    }
-
-    public List<TransactionRule> getTransactionRules(DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
-
-        return ((List<TransactionRule>) transactionRuleRepository.findAll());
+        return ((List<TransactionLine>) transactionLineRepository.findAll());
     }
 
     public List<Supplier> getSuppliers(DataFetchingEnvironment env) {
@@ -222,4 +256,30 @@ public class Query implements GraphQLQueryResolver {
         return supplierRepository.findById(id).orElse(null);
     }
 
+    public Attribute getAttribute(Integer id, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return attributeRepository.findById(id).orElse(null);
+    }
+
+    public List<Attribute> getAttributes(DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return ((List<Attribute>) attributeRepository.findAll());
+    }
+
+    public TransactionMutation getTransactionMutation(Integer id, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return transactionMutationRepository.findById(id).orElse(null);
+    }
+
+    public List<TransactionMutation> getTransactionMutations(Integer transactionId, DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        if (transactionId != null){
+            return ((List<TransactionMutation>) transactionMutationRepository.findAllByTransactionId(transactionId));
+        } else
+            return ((List<TransactionMutation>) transactionMutationRepository.findAll());
+    }
 }

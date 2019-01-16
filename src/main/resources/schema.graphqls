@@ -5,6 +5,7 @@ type Role {
 }
 
 scalar LocalDate
+scalar LocalDateTime
 
 type User {
     id: Int!
@@ -28,6 +29,15 @@ type Item {
     locations: [Location]
     categories: [Category]
     supplier: Supplier
+    attributes: [Attribute]!
+    deletedDate: LocalDate
+}
+
+type Attribute {
+    id: Int!
+    name: String!
+    value: String!
+    item: Item!
 }
 
 type Location {
@@ -38,6 +48,7 @@ type Location {
     height: Int!
     items: [Item]!
     categories: [Category]!
+    account: Account
 }
 
 type Supplier {
@@ -59,16 +70,17 @@ type Transaction {
     createdDate: LocalDate!
     updateDate: LocalDate!
     deletedDate: LocalDate
+    plannedDate: LocalDate!
     receivedDate: LocalDate
+    description: String
     locked: Boolean!
-    transactionRules: [TransactionRule]!
+    transactionMutations: [TransactionMutation]!
+    transactionLines: [TransactionLine]!
 }
 
-type TransactionRule {
+type TransactionLine {
     id: Int!
     amount: Int!
-    plannedDate: LocalDate!
-    actualDate: LocalDate!
     transaction: Transaction!
     item: Item!
 }
@@ -76,6 +88,8 @@ type TransactionRule {
 type Account {
     id: Int!
     name: String!
+    location: Location
+    deletedDate: LocalDate
 }
 
 type Balance {
@@ -85,12 +99,12 @@ type Balance {
     account: Account!
 }
 
-type BalanceMutation {
+type TransactionMutation {
     id: Int!
-    item: Item!
-    account: Account!
-    amount: Int!
-    reason: String!
+    transaction: Transaction!
+    user: User!
+    date: String!
+    description: String!
 }
 
 type Query {
@@ -102,7 +116,10 @@ type Query {
 	roles: [Role]!
 	role(id: Int!): Role
 	currentUser: User
-	items: [Item]!
+
+    # showDeleted parameter is false by default.
+	items(showDeleted: Boolean): [Item]!
+
 	item(id: Int!): Item
 	locations: [Location]!
 	location(id: Int!): Location
@@ -110,17 +127,19 @@ type Query {
     category(id: Int!): Category
 
     # All the parameters are false by default.
-    transactions(showDeleted: Boolean, showOrders: Boolean, showReservations: Boolean, showReturns: Boolean): [Transaction]!
+    transactions(showDeleted: Boolean, showOrders: Boolean, showReservations: Boolean, showReturns: Boolean, showLocation: Boolean, showWriteOff: Boolean, showManual: Boolean): [Transaction]!
 
     transaction(id: Int!): Transaction
-    transactionRules: [TransactionRule]!
-    transactionRule(id: Int!): TransactionRule
-    accounts: [Account]!
+    transactionLines: [TransactionLine]!
+    transactionLine(id: Int!): TransactionLine
+    transactionMutation(id: Int!): TransactionMutation
+    transactionMutations(transactionId: Int): [TransactionMutation]!
+    accounts(showDeleted: Boolean): [Account]!
     account(id: Int!): Account
     balances: [Balance]!
     balance(id: Int!): Balance
-    balanceMutations: [BalanceMutation]!
-    balanceMutation(id: Int!): BalanceMutation
+    attribute(id: Int!): Attribute
+    attributes: [Attribute]!
 }
 
 type Mutation {
@@ -130,13 +149,16 @@ type Mutation {
     updateSupplier(name: String!, id: Int!): Supplier
     deleteSupplier(id: Int!): Supplier
 
-    createItem(name: String!, code: String, recommendedStock: Int, locationId: Int, categoryId: Int, supplierId: Int): Item
-    updateItem(itemId: Int!, name: String, code: String, recommendedStock: Int, supplierId: Int): Item
-    deleteItem(itemId: Int!): Boolean
+    createItem(name: String!, code: String, recommendedStock: Int, locationId: [Int!]!, categoryId: [Int!]!, supplierId: Int): Item
+    updateItem(itemId: Int!, name: String, code: String, recommendedStock: Int, supplierId: Int, locationIds: [Int!], categoryIds: [Int!]): Item
+    deleteItem(itemId: Int!): Item
     itemAddLocation(itemId: Int!, locationId: Int!): Item
     itemRemoveLocation(itemId: Int!, locationId: Int!): Item
     itemAddCategory(itemId: Int!, categoryId: Int!): Item
     itemRemoveCategory(itemId: Int!, categoryId: Int!): Item
+    createAttribute(itemId: Int!, name: String!, value: String!): Item
+    deleteAttribute(attributeId: Int!): Boolean
+    updateAttribute(attributeId: Int!, name: String, value: String, itemId: Int): Attribute
 
     createUser(firstName: String!, lastName: String!, email: String!, password: String!): User
     addRole(userId: Int!, roleId: Int!): User
@@ -144,11 +166,12 @@ type Mutation {
     updateUser(id: Int!, firstName: String, lastName: String, email: String, password: String): User
 
     createLocation(code: String!, depth: Int!, width: Int!, height: Int!): Location
+    updateLocation(locationId: Int!, code: String, depth: Int, width: Int, height: Int): Location
     deleteLocation(locationId: Int!): Boolean
 
     createCategory(name: String!): Category
     deleteCategory(categoryId: Int!): Boolean
-    categoryChangeName(categoryId: Int!, name: String!): Category
+    updateCategory(categoryId: Int!, name: String): Category
     categoryAddLocation(categoryId: Int!, locationId: Int!): Category
     categoryRemoveLocation(categoryId: Int!, locationId: Int!): Category
 
@@ -158,29 +181,35 @@ type Mutation {
     # Creates an account representing the in-use items. Not keeping track of items outside of the warehouse because it is out-of-scope.
     createInUseAccount: Account
 
-    # Every item in the warehouse needs a balance to see how much of it is in stock. Default account is warehouse.
-    createBalance(itemId: Int!, accountId: Int, amount: Int): Balance
+    # Every item in the warehouse needs a balance to see how much of it is in stock. Default amount is 0.
+    createBalance(itemId: Int!, accountId: Int!, amount: Int): Balance
 
     # Sets the balance to given amount. Creates a balance mutation along with a default reason, if not specified.
-    setBalance(balanceId: Int!, amount: Int!, reason: String): Balance
+    updateBalance(balanceId: Int!, amount: Int!, description: String): Balance
 
-    # Transaction that takes items out of the warehouse. Adding a rule is optional.
-    createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
+    # Transaction that takes items out of the warehouse. Adding a line is optional.
+    createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, locationId: Int): Transaction
 
-    # Transaction that represents an order from a supplier to the warehouse. Adding a rule is optional.
-    createOrderTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
+    # Transaction that represents an order from a supplier to the warehouse. Adding a line is optional.
+    createOrderTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, locationId: Int): Transaction
 
-    # Transaction that takes items into the warehouse. Adding a rule is optional.
-    createReturnTransaction(itemId: Int, amount: Int, plannedDate: LocalDate): Transaction
+    # Transaction that takes items into the warehouse. Adding a line is optional.
+    createReturnTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, locationId: Int): Transaction
 
-    # Adds rule to transaction. Default planned date is today.
-    addRuleToTransaction(transactionId: Int!, itemId: Int!, amount: Int!, plannedDate: LocalDate): TransactionRule
+    # Transaction that moves items between locations inside of the warehouse. Adding a line is optional.
+    createLocationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, fromLocationId: Int!, toLocationId: Int!): Transaction
 
-    # Allows you to change properties of the transaction rule.
-    changeTransactionRule(transactionRuleId: Int!, itemId: Int, amount: Int, plannedDate: LocalDate): TransactionRule
+    # Transaction used to dispose items in the warehouse. Adding a line is optional.
+    createWriteOffTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, locationId: Int): Transaction
+
+    # Adds line to transaction. Default planned date is today.
+    addLineToTransaction(transactionId: Int!, itemId: Int!, amount: Int!): TransactionLine
+
+    # Allows you to change properties of the transaction line.
+    updateTransactionLine(TransactionLineId: Int!, itemId: Int, amount: Int): TransactionLine
 
     # Allows you to change sending- and/or receiving account of transaction.
-    changeTransaction(transactionId: Int!, fromAccountId: Int, toAccountId: Int): Transaction
+    updateTransaction(transactionId: Int!, fromAccountId: Int, toAccountId: Int, plannedDate: LocalDate, description: String): Transaction
 
     # Updates the balances and locks the transaction. Also checks if stock wont go below zero before executing.
     executeTransaction(transactionId: Int!): Transaction
@@ -188,6 +217,6 @@ type Mutation {
     # Fake delete action. It only sets the date_deleted to the current day and locks the transaction.
     deleteTransaction(transactionId: Int!): Transaction
 
-    # Deletes transaction rule, ignoring lock.
-    deleteTransactionRule(transactionRuleId: Int!): Boolean
+    # Deletes transaction line, ignoring lock.
+    deleteTransactionLine(TransactionLineId: Int!): Boolean
 }

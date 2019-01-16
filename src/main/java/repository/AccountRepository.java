@@ -13,5 +13,9 @@ public interface AccountRepository extends CrudRepository<Account, Integer> {
         return findByName(account == null ? null : account.getName());
     }
 
+    Optional<Account> findByLocationId(int locationId);
 
+    default Optional<Account> findByLocationId(Account account) {
+        return findByLocationId(account == null ? null : account.getLocation().getId());
+    }
 }
