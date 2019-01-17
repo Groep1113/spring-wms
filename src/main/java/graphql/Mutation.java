@@ -385,9 +385,7 @@ public class Mutation implements GraphQLMutationResolver {
     public User createUser(
         String firstName, String lastName, String email, String password, DataFetchingEnvironment env
     ) {
-        Set<String> authorizedRoles = new HashSet<>();
-        authorizedRoles.add("admin");
-        AuthContext.requireAuth(env, authorizedRoles);
+        AuthContext.requireAuth(env);
 
         User user = new User();
         user.setFirstName(firstName);
