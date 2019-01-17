@@ -8,7 +8,7 @@ import java.util.Set;
 public class Supplier {
     // fields
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
