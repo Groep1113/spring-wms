@@ -11,6 +11,10 @@ import java.util.Set;
 
 public class AuthContext extends GraphQLContext {
 
+    private final static String UNAUTHORIZED_CODE = "E401";
+    private final static String UNAUTHORIZED_MSG
+        = UNAUTHORIZED_CODE + ": Unauthorized. Either not logged in or you are not in possession of authorized role.";
+
     private final User user;
 
     public AuthContext(User user, HttpServletRequest request, HttpServletResponse response) {
@@ -31,7 +35,7 @@ public class AuthContext extends GraphQLContext {
     public static void requireAuth(DataFetchingEnvironment env) {
         // for now simply check if a user is logged in
         if (((AuthContext) env.getContext()).getUser() == null)
-            throw new GraphQLException("Unauthorized. Either not logged in or you are not in possession of authorized role.");
+            throw new GraphQLException(UNAUTHORIZED_MSG);
     }
 
     public static void requireAuth(DataFetchingEnvironment env, Set<String> authorizedRoles) {
@@ -42,6 +46,6 @@ public class AuthContext extends GraphQLContext {
             for (String authorizedRole: authorizedRoles)
                 if (userRole.getName().equals(authorizedRole))
                     return;
-        throw new GraphQLException("Unauthorized. Either not logged in or you are not in possession of authorized role.");
+        throw new GraphQLException(UNAUTHORIZED_MSG);
     }
 }
