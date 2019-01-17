@@ -9,7 +9,7 @@ import javax.validation.constraints.NotNull;
 public class TransactionLine {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @NotNull
