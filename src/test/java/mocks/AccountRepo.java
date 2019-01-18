@@ -12,6 +12,11 @@ public class AccountRepo implements AccountRepository {
     }
 
     @Override
+    public Optional<Account> findByLocationId(int locationId) {
+        return Optional.empty();
+    }
+
+    @Override
     public <S extends Account> S save(S entity) {
         return null;
     }

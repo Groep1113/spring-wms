@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public class TransactionRepo implements TransactionRepository {
     @Override
-    public Iterable<Transaction> findAllByFromAccountName(String name) {
+    public Iterable<Transaction> findAllByFromAccountNameAndToAccountName(String fromName, String toName) {
         return null;
     }
 

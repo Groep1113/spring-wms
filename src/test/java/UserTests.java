@@ -1,4 +1,3 @@
-import com.google.common.graph.Graph;
 import entity.Role;
 import entity.User;
 import graphql.GraphQLException;
@@ -31,10 +30,11 @@ public class UserTests {
             new CategoryRepo(),
             new RoleRepo(),
             new TransactionRepo(),
-            new TransactionRuleRepo(),
+            new TransactionLineRepo(),
             new AccountRepo(),
             new BalanceRepo(),
-            new BalanceMutationRepo()
+            new AttributeRepo(),
+            new TransactionMutationRepo()
         );
         this.query = new Query(
             new UserRepo(),
@@ -44,10 +44,11 @@ public class UserTests {
             new LocationRepo(),
             new CategoryRepo(),
             new TransactionRepo(),
-            new TransactionRuleRepo(),
+            new TransactionLineRepo(),
             new AccountRepo(),
             new BalanceRepo(),
-            new BalanceMutationRepo()
+            new AttributeRepo(),
+            new TransactionMutationRepo()
         );
         this.mockDFE = new MockDFE();
     }
@@ -83,7 +84,7 @@ public class UserTests {
         assertEquals("The user should have a role of admin", "admin", firstUserRole.getName());
 
         User userWithSalesRole = mutation.addRole(1, 2, this.mockDFE);
-        Role secondUserRole = ((Role) userWithSalesRole.getRoles().toArray()[1]);
+        Role secondUserRole = ((Role) userWithSalesRole.getRoles().toArray()[0]);
         assertEquals("The user should have a role of sales", "inkoop", secondUserRole.getName());
     }
 
