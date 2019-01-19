@@ -10,10 +10,23 @@ import graphql.language.FragmentDefinition;
 import graphql.schema.*;
 import org.dataloader.DataLoader;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 public class MockDFE implements DataFetchingEnvironment {
+
+    private User user;
+
+    public MockDFE() {
+        User user = new User();
+        user.setId(1337);
+        user.setFirstName("unit");
+        user.setLastName("test");
+        user.setRoles(new HashSet<>());
+        this.user = user;
+    }
+
     @Override
     public <T> T getSource() {
         return null;
@@ -36,11 +49,7 @@ public class MockDFE implements DataFetchingEnvironment {
 
     @Override
     public <T> T getContext() {
-        User user = new User();
-        user.setId(1337);
-        user.setFirstName("unit");
-        user.setLastName("test");
-        return (T) new AuthContext(user, null, null);
+        return (T) new AuthContext(this.user, null, null);
     }
 
     @Override

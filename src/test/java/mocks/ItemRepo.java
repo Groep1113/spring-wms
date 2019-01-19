@@ -1,9 +1,12 @@
 package mocks;
 
 import entity.Item;
+import entity.Location;
 import repository.ItemRepository;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public class ItemRepo implements ItemRepository {
     @Override
@@ -18,7 +21,9 @@ public class ItemRepo implements ItemRepository {
 
     @Override
     public Optional<Item> findById(Integer integer) {
-        return Optional.empty();
+        Set<Location> locationSet = new HashSet<>();
+        locationSet.add(new Location("A1", 1,1,1));
+        return Optional.of(new Item("Lenovo Yoga", "YOGA", 5, locationSet, null, null));
     }
 
     @Override

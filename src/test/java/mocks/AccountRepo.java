@@ -1,6 +1,7 @@
 package mocks;
 
 import entity.Account;
+import entity.Location;
 import repository.AccountRepository;
 
 import java.util.Optional;
@@ -8,12 +9,13 @@ import java.util.Optional;
 public class AccountRepo implements AccountRepository {
     @Override
     public Optional<Account> findByName(String name) {
-        return Optional.empty();
+        return Optional.of(new Account(name));
     }
 
     @Override
     public Optional<Account> findByLocationId(int locationId) {
-        return Optional.empty();
+        Account account = new Account("account", new Location("A1", 1, 1,1));
+        return Optional.of(account);
     }
 
     @Override

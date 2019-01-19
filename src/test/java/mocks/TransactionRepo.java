@@ -1,8 +1,10 @@
 package mocks;
 
+import entity.Account;
 import entity.Transaction;
 import repository.TransactionRepository;
 
+import java.util.HashSet;
 import java.util.Optional;
 
 public class TransactionRepo implements TransactionRepository {
@@ -13,7 +15,9 @@ public class TransactionRepo implements TransactionRepository {
 
     @Override
     public <S extends Transaction> S save(S entity) {
-        return null;
+        Transaction transaction = entity;
+        transaction.setId(1);
+        return entity;
     }
 
     @Override
@@ -23,7 +27,11 @@ public class TransactionRepo implements TransactionRepository {
 
     @Override
     public Optional<Transaction> findById(Integer integer) {
-        return Optional.empty();
+        Account account = new Account("account");
+        Transaction transaction = new Transaction(account, account, null, "description");
+        transaction.setId(integer);
+        transaction.setTransactionLines(new HashSet<>());
+        return Optional.of(transaction);
     }
 
     @Override
