@@ -21,7 +21,7 @@ public class UserSeeder {
             u.setFirstName(firstName);
             u.setLastName(surnames[rand.nextInt(surnames.length - 1)]);
             u.setEmail(firstName + "@bs-htg.com");
-            u.setPassword(Integer.toString(rand.nextInt(10) + 1));
+            u.setPassword("password");
             this.repository.save(u);
         }
 
