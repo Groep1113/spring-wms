@@ -1,5 +1,6 @@
 package seeder;
 
+import entity.Role;
 import entity.User;
 import org.springframework.data.repository.CrudRepository;
 

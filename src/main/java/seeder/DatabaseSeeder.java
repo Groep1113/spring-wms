@@ -25,9 +25,9 @@ public class DatabaseSeeder {
     private final AccountRepository accountRepository;
     private final TransactionRepository transactionRepository;
     private final TransactionLineRepository transactionLineRepository;
-
+    private final BalanceRepository balanceRepository;
+    private final RoleRepository roleRepository;
     Logger logger = LoggerFactory.getLogger(DatabaseSeeder.class);
-
 
     @Autowired
     public DatabaseSeeder(UserRepository userRepository,
@@ -38,6 +38,8 @@ public class DatabaseSeeder {
                           AccountRepository accountRepository,
                           TransactionRepository transactionRepository,
                           TransactionLineRepository transactionLineRepository,
+                          BalanceRepository balanceRepository,
+                          RoleRepository roleRepository,
                           JdbcTemplate jdbcTemplate) {
 
         this.userRepository = userRepository;
@@ -48,6 +50,8 @@ public class DatabaseSeeder {
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
         this.transactionLineRepository = transactionLineRepository;
+        this.balanceRepository = balanceRepository;
+        this.roleRepository = roleRepository;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -55,16 +59,20 @@ public class DatabaseSeeder {
         Seeder.setJdbcTemplate(this.jdbcTemplate);
 
         // NOTE: Order is important!
+        new RoleSeeder(roleRepository).seed();
         new UserSeeder(userRepository).seed();
+        new UserRoleSeeder(roleRepository, userRepository).seed();
         new CategorySeeder(categoryRepository).seed();
         new LocationSeeder(locationRepository).seed();
         new AccountSeeder(accountRepository, locationRepository).seed();
         new CategoryLocationSeeder(categoryRepository, locationRepository).seed();
         new SupplierSeeder(supplierRepository).seed();
         new ItemSeeder(itemRepository, categoryRepository, supplierRepository).seed();
+        // What are supplier items for?
+//        new SupplierItemSeeder(supplierRepository, itemRepository).seed();
         new TransactionSeeder(transactionRepository, accountRepository).seed();
         new TransactionLineSeeder(transactionLineRepository, transactionRepository, itemRepository).seed();
-
+        new BalanceSeeder(balanceRepository, transactionRepository).seed();
     }
 
     public static void enableSeeding() {
