@@ -3,7 +3,7 @@ package seeder;
 import entity.Category;
 import org.springframework.data.repository.CrudRepository;
 
-public class CategorySeeder extends TableSeeder{
+public class CategorySeeder extends Seeder {
 
     public static final String[] categories = {"Kabels", "Laptops", "Toetsenborden", "Printers", "Scanners", "Overig"};
     public CategorySeeder(CrudRepository repository) {

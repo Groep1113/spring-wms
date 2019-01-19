@@ -5,7 +5,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.Random;
 
-public class UserSeeder extends TableSeeder{
+public class UserSeeder extends Seeder {
 
     public UserSeeder(CrudRepository repository) {
         super(repository, "user");

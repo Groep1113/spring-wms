@@ -1,11 +1,12 @@
 package seeder;
 
+import entity.Account;
+import entity.Transaction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import repository.*;
@@ -22,8 +23,11 @@ public class DatabaseSeeder {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
+    private final TransactionLineRepository transactionLineRepository;
 
     Logger logger = LoggerFactory.getLogger(DatabaseSeeder.class);
+
 
     @Autowired
     public DatabaseSeeder(UserRepository userRepository,
@@ -32,6 +36,8 @@ public class DatabaseSeeder {
                           LocationRepository locationRepository,
                           SupplierRepository supplierRepository,
                           AccountRepository accountRepository,
+                          TransactionRepository transactionRepository,
+                          TransactionLineRepository transactionLineRepository,
                           JdbcTemplate jdbcTemplate) {
 
         this.userRepository = userRepository;
@@ -40,21 +46,24 @@ public class DatabaseSeeder {
         this.locationRepository = locationRepository;
         this.supplierRepository = supplierRepository;
         this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
+        this.transactionLineRepository = transactionLineRepository;
         this.jdbcTemplate = jdbcTemplate;
     }
 
     private void seed() {
-        TableSeeder.setJdbcTemplate(this.jdbcTemplate);
+        Seeder.setJdbcTemplate(this.jdbcTemplate);
+
+        // NOTE: Order is important!
         new UserSeeder(userRepository).seed();
         new CategorySeeder(categoryRepository).seed();
         new LocationSeeder(locationRepository).seed();
-        // Requires Locations
         new AccountSeeder(accountRepository, locationRepository).seed();
-        // Requires Categories and Locations
         new CategoryLocationSeeder(categoryRepository, locationRepository).seed();
         new SupplierSeeder(supplierRepository).seed();
-        // Requires Categories and Suppliers
         new ItemSeeder(itemRepository, categoryRepository, supplierRepository).seed();
+        new TransactionSeeder(transactionRepository, accountRepository).seed();
+        new TransactionLineSeeder(transactionLineRepository, transactionRepository, itemRepository).seed();
 
     }
 
@@ -74,7 +83,7 @@ public class DatabaseSeeder {
         }
     }
 
-    public static String getNFromStringArray(int n, String[] array) {
+    static String getNFromStringArray(int n, String[] array) {
         Random rand = new Random();
         StringBuilder returnString = new StringBuilder();
         for(int i = 0; i < n; i++) {

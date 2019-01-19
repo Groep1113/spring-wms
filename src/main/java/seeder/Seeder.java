@@ -5,19 +5,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-public abstract class TableSeeder {
+public abstract class Seeder {
     protected CrudRepository repository;
     private String tableName;
     private static JdbcTemplate jdbcTemplate;
-    Logger logger = LoggerFactory.getLogger(TableSeeder.class);
+    Logger logger = LoggerFactory.getLogger(Seeder.class);
 
-    TableSeeder(CrudRepository repository, String tableName) {
+    Seeder(CrudRepository repository, String tableName) {
         this.repository = repository;
         this.tableName = tableName;
     }
 
     static void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        TableSeeder.jdbcTemplate = jdbcTemplate;
+        Seeder.jdbcTemplate = jdbcTemplate;
     }
 
     boolean shouldSeed() {

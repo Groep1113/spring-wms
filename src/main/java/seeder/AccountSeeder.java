@@ -5,7 +5,7 @@ import entity.Location;
 import org.springframework.data.repository.CrudRepository;
 import repository.LocationRepository;
 
-public class AccountSeeder extends TableSeeder{
+public class AccountSeeder extends Seeder {
     private final LocationRepository locationRepository;
 
     AccountSeeder(CrudRepository repository, LocationRepository locationRepository) {
@@ -18,7 +18,7 @@ public class AccountSeeder extends TableSeeder{
         String[] names = {Account.SUPPLIER, Account.WAREHOUSE, Account.IN_USE, Account.MANUAL, Account.WRITE_OFF};
         // TODO: Remove / Fix locations. What are locations for in context of accounts?
         Location location = null;
-        for(Location testLocation: locationRepository.findAll()){
+        for (Location testLocation: locationRepository.findAll()){
             location = testLocation;
             break;
         }

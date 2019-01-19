@@ -3,7 +3,7 @@ package seeder;
 import entity.Location;
 import org.springframework.data.repository.CrudRepository;
 
-public class LocationSeeder extends TableSeeder{
+public class LocationSeeder extends Seeder {
 
     LocationSeeder(CrudRepository repository) {
         super(repository, "location");

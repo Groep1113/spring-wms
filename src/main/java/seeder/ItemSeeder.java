@@ -8,10 +8,9 @@ import repository.CategoryRepository;
 import repository.SupplierRepository;
 
 import java.util.Optional;
-import java.util.Random;
 import java.util.Set;
 
-public class ItemSeeder extends TableSeeder{
+public class ItemSeeder extends Seeder {
 
     private final CategoryRepository categoryRepository;
     private final SupplierRepository supplierRepository;

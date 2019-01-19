@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Set;
 
-public class CategoryLocationSeeder extends TableSeeder{
+public class CategoryLocationSeeder extends Seeder {
     private final LocationRepository locationRepository;
     private final CategoryRepository categoryRepository;
 

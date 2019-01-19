@@ -3,7 +3,7 @@ package seeder;
 import entity.Supplier;
 import org.springframework.data.repository.CrudRepository;
 
-public class SupplierSeeder extends TableSeeder{
+public class SupplierSeeder extends Seeder {
     SupplierSeeder(CrudRepository repository) {
         super(repository, "supplier");
     }
