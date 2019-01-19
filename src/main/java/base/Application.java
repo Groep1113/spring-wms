@@ -17,9 +17,10 @@ import seeder.DatabaseSeeder;
 public class Application {
     public static void main(String[] args) {
         if (args.length > 0) {
-            System.out.println(args.length);
-            if ("seed".equals(args[0])) {
-                DatabaseSeeder.enableSeeding();
+            for (String arg: args) {
+                if ("seed".equals(arg)) {
+                    DatabaseSeeder.enableSeeding();
+                }
             }
         }
         SpringApplication.run(Application.class, args);
