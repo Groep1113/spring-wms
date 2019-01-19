@@ -1,15 +1,15 @@
 package seeder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.rowset.SqlRowSet;
-
-import java.util.List;
 
 public abstract class TableSeeder {
     protected CrudRepository repository;
     private String tableName;
     private static JdbcTemplate jdbcTemplate;
+    Logger logger = LoggerFactory.getLogger(TableSeeder.class);
 
     TableSeeder(CrudRepository repository, String tableName) {
         this.repository = repository;
@@ -34,11 +34,11 @@ public abstract class TableSeeder {
 
     public void seed() {
         if(!shouldSeed()) {
-            System.out.println("Table '" + tableName + "' has already been seeded. Stopping.");
+            logger.info("Table '" + tableName + "' has already been seeded. Stopping.");
             return;
         }
         seedJob();
-        System.out.println("Succesfully seeded " + tableName + " table.");
+        logger.info("Succesfully seeded " + tableName + " table.");
     }
 
     abstract void seedJob();
