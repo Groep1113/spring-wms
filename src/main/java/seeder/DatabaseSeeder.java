@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import repository.*;
@@ -19,7 +20,9 @@ public class DatabaseSeeder {
     private final LocationRepository locationRepository;
     private final ItemRepository itemRepository;
     private final CategoryRepository categoryRepository;
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
+    
     Logger logger = LoggerFactory.getLogger(DatabaseSeeder.class);
 
     @Autowired
@@ -28,6 +31,7 @@ public class DatabaseSeeder {
                           ItemRepository itemRepository,
                           LocationRepository locationRepository,
                           SupplierRepository supplierRepository,
+                          AccountRepository accountRepository,
                           JdbcTemplate jdbcTemplate) {
 
         this.userRepository = userRepository;
@@ -35,19 +39,22 @@ public class DatabaseSeeder {
         this.itemRepository = itemRepository;
         this.locationRepository = locationRepository;
         this.supplierRepository = supplierRepository;
+        this.accountRepository = accountRepository;
         this.jdbcTemplate = jdbcTemplate;
     }
 
     private void seed() {
         TableSeeder.setJdbcTemplate(this.jdbcTemplate);
-        new UserSeeder(this.userRepository).seed();
-        new CategorySeeder(this.categoryRepository).seed();
-        new LocationSeeder(this.locationRepository).seed();
+        new UserSeeder(userRepository).seed();
+        new CategorySeeder(categoryRepository).seed();
+        new LocationSeeder(locationRepository).seed();
+        // Requires Locations
+        new AccountSeeder(accountRepository, locationRepository)
         // Requires Categories and Locations
-        new CategoryLocationSeeder(this.categoryRepository, this.locationRepository).seed();
-        new SupplierSeeder(this.supplierRepository).seed();
+        new CategoryLocationSeeder(categoryRepository, locationRepository).seed();
+        new SupplierSeeder(supplierRepository).seed();
         // Requires Categories and Suppliers
-        new ItemSeeder(this.itemRepository, this.categoryRepository, this.supplierRepository).seed();
+        new ItemSeeder(itemRepository, categoryRepository, supplierRepository).seed();
 
     }
 
