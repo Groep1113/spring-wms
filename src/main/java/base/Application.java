@@ -8,14 +8,20 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import seeder.DatabaseSeeder;
 
 @SpringBootApplication
 @EnableJpaRepositories("repository")
-@ComponentScan(basePackages = {"base", "entity", "controller", "repository", "graphql"})
+@ComponentScan(basePackages = {"base", "entity", "controller", "repository", "graphql", "seeder"})
 @EntityScan("entity")
 public class Application {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        if (args.length > 0) {
+            System.out.println(args.length);
+            if ("seed".equals(args[0])) {
+                DatabaseSeeder.enableSeeding();
+            }
+        }
         SpringApplication.run(Application.class, args);
     }
 
