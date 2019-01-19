@@ -4,13 +4,27 @@ import entity.Account;
 import entity.Transaction;
 import repository.TransactionRepository;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 
 public class TransactionRepo implements TransactionRepository {
+
+    private Transaction transaction;
+
+    public Transaction getTransaction() {
+        return transaction;
+    }
+
+    public void setTransaction(Transaction transaction) {
+        this.transaction = transaction;
+    }
+
     @Override
     public Iterable<Transaction> findAllByFromAccountNameAndToAccountName(String fromName, String toName) {
-        return null;
+        ArrayList<Transaction> transactions = new ArrayList<>();
+        transactions.add(transaction);
+        return transactions;
     }
 
     @Override
