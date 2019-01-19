@@ -1,15 +1,23 @@
 package seeder;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+import repository.UserRepository;
 
 @Component
 public class DatabaseSeeder {
     private static boolean seedingEnabled = false;
+    private UserRepository userRepository;
 
-    public DatabaseSeeder() {
+    @Autowired
+    public DatabaseSeeder(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
+    private void seed() {
+        new UserSeeder(this.userRepository).seed();
     }
 
     public static void enableSeeding() {
@@ -21,11 +29,10 @@ public class DatabaseSeeder {
     }
 
     @EventListener
-    public void seed(ContextRefreshedEvent event) {
+    public void checkSeedOnEvent(ContextRefreshedEvent event) {
         if (DatabaseSeeder.seedingEnabled) {
-            System.out.println("Seeding is enabled!!");
-        } else {
-            System.out.println("Seeding doesn't work.");
+            System.out.println("Seed jobs sent.");
+            seed();
         }
     }
 }
