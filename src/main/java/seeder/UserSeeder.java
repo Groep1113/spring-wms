@@ -5,13 +5,13 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.Random;
 
-public class UserSeeder {
-    private CrudRepository repository;
+public class UserSeeder extends TableSeeder{
+
     public UserSeeder(CrudRepository repository) {
-        this.repository = repository;
+        super(repository, "user");
     }
 
-    public void seed() {
+    public void seedJob() {
         String[] firstNames = {"Bob", "Henk", "Klaas", "Piet", "Froukje", "Linda"};
         String[] surnames = {"de Vries", "Klaassen", "Teunissen", "Boxma", "de Wilg", "Vredeveld"};
         Random rand = new Random();
@@ -20,10 +20,9 @@ public class UserSeeder {
             String firstName = firstNames[rand.nextInt(firstNames.length - 1)];
             u.setFirstName(firstName);
             u.setLastName(surnames[rand.nextInt(surnames.length - 1)]);
-            u.setEmail(firstName + "@bs-htg.com");
+            u.setEmail(firstName.toLowerCase()   + "@bs-htg.com");
             u.setPassword("password");
             this.repository.save(u);
         }
-
     }
 }

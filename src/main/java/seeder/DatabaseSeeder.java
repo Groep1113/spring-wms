@@ -3,20 +3,25 @@ package seeder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import repository.UserRepository;
 
 @Component
 public class DatabaseSeeder {
     private static boolean seedingEnabled = false;
+    private final JdbcTemplate jdbcTemplate;
     private UserRepository userRepository;
 
     @Autowired
-    public DatabaseSeeder(UserRepository userRepository) {
+    public DatabaseSeeder(UserRepository userRepository,
+                          JdbcTemplate jdbcTemplate) {
         this.userRepository = userRepository;
+        this.jdbcTemplate = jdbcTemplate;
     }
 
     private void seed() {
+        TableSeeder.setJdbcTemplate(this.jdbcTemplate);
         new UserSeeder(this.userRepository).seed();
     }
 
