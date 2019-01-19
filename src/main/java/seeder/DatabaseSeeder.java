@@ -22,7 +22,7 @@ public class DatabaseSeeder {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final AccountRepository accountRepository;
-    
+
     Logger logger = LoggerFactory.getLogger(DatabaseSeeder.class);
 
     @Autowired
@@ -49,7 +49,7 @@ public class DatabaseSeeder {
         new CategorySeeder(categoryRepository).seed();
         new LocationSeeder(locationRepository).seed();
         // Requires Locations
-        new AccountSeeder(accountRepository, locationRepository)
+        new AccountSeeder(accountRepository, locationRepository).seed();
         // Requires Categories and Locations
         new CategoryLocationSeeder(categoryRepository, locationRepository).seed();
         new SupplierSeeder(supplierRepository).seed();
