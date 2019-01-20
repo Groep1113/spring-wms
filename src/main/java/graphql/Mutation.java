@@ -118,7 +118,7 @@ public class Mutation implements GraphQLMutationResolver {
         System.out.println("locationIds: ");
         if (locationIds != null)
             for (Integer locationId: locationIds)
-                System.out.println();
+                System.out.println(locationId);
         Item item = itemRepository
                 .findById(itemId)
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
