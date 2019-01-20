@@ -1,5 +1,6 @@
 package seeder;
 
+import entity.Account;
 import entity.Balance;
 import entity.Transaction;
 import entity.TransactionLine;
@@ -49,9 +50,11 @@ public class BalanceSeeder extends Seeder{
                         toBalance = toBalancePromise.get();
                     }
                     toBalance.setAmount(toBalance.getAmount() + tl.getAmount());
-                    fromBalance.setAmount(fromBalance.getAmount() - tl.getAmount());
                     balanceRepository.save(toBalance);
-                    balanceRepository.save(fromBalance);
+                    if (fromBalance.getAccount().getName().equals(Account.WAREHOUSE)) {
+                        fromBalance.setAmount(fromBalance.getAmount() - tl.getAmount());
+                        balanceRepository.save(fromBalance);
+                    }
                 }
             }
         }

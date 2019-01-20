@@ -16,7 +16,6 @@ public class AccountSeeder extends Seeder {
     @Override
     void seedJob() {
         String[] names = {Account.SUPPLIER, Account.WAREHOUSE, Account.IN_USE, Account.MANUAL, Account.WRITE_OFF};
-        // TODO: Remove / Fix locations. What are locations for in context of accounts?
         Location location = null;
         for (Location testLocation: locationRepository.findAll()){
             location = testLocation;
@@ -25,7 +24,9 @@ public class AccountSeeder extends Seeder {
         for(String name: names) {
             Account account = new Account();
             account.setName(name);
-            account.setLocation(location);
+            if(name.equals(Account.WAREHOUSE)) {
+                account.setLocation(location);
+            }
             repository.save(account);
         }
     }
