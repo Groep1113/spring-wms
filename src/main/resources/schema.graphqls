@@ -208,8 +208,8 @@ type Mutation {
     # Allows you to change properties of the transaction line.
     updateTransactionLine(TransactionLineId: Int!, itemId: Int, amount: Int): TransactionLine
 
-    # Allows you to change sending- and/or receiving account of transaction.
-    updateTransaction(transactionId: Int!, fromAccountId: Int, toAccountId: Int, plannedDate: LocalDate, description: String): Transaction
+    # Allows you to change plannedDate and/or description.
+    updateTransaction(transactionId: Int!, plannedDate: LocalDate, description: String): Transaction
 
     # Updates the balances and locks the transaction. Also checks if stock wont go below zero before executing.
     executeTransaction(transactionId: Int!): Transaction

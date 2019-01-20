@@ -666,33 +666,13 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Transaction updateTransaction(
-        Integer transactionId, Integer fromAccountId, Integer toAccountId, LocalDate plannedDate, String description, DataFetchingEnvironment env
+        Integer transactionId, LocalDate plannedDate, String description, DataFetchingEnvironment env
     ) {
         AuthContext.requireAuth(env);
 
         Transaction transaction = transactionRepository
             .findById(transactionId)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionId, Transaction.class.getSimpleName())));
-
-        if (fromAccountId != null) {
-            transactionMutationRepository
-                    .save(new TransactionMutation(
-                            transaction,
-                            (((AuthContext) env.getContext()).getUser()),
-                            LocalDateTime.now(),
-                            "Updated fromAcount " + transaction.getFromAccount().getId() + " -> " + fromAccountId));
-            transaction.setFromAccount(accountRepository.findById(fromAccountId).orElseThrow(() -> new GraphQLException(idNotFoundMessage(fromAccountId, Account.class.getSimpleName()))));
-        }
-
-        if (toAccountId != null) {
-            transactionMutationRepository
-                    .save(new TransactionMutation(
-                            transaction,
-                            (((AuthContext) env.getContext()).getUser()),
-                            LocalDateTime.now(),
-                            "Updated toAcount " + transaction.getToAccount().getId() + " -> " + toAccountId));
-            transaction.setToAccount(accountRepository.findById(toAccountId).orElseThrow(() -> new GraphQLException(idNotFoundMessage(toAccountId, Account.class.getSimpleName()))));
-        }
 
         if (plannedDate != null) {
             transactionMutationRepository
