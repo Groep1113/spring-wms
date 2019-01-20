@@ -187,8 +187,8 @@ type Mutation {
     # Sets the balance to given amount. Creates a balance mutation along with a default reason, if not specified.
     updateBalance(balanceId: Int!, amount: Int!, description: String): Balance
 
-    # Transaction that takes items out of the warehouse. Adding a line is optional.
-    createReservationTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, locationId: Int): Transaction
+    # Transaction that takes items out of the warehouse
+    createReservationTransaction(itemId: Int!, amount: Int!, plannedDate: LocalDate, description: String, locationId: Int!): Transaction
 
     # Transaction that represents an order from a supplier to the warehouse. Adding a line is optional.
     createOrderTransaction(itemId: Int, amount: Int, plannedDate: LocalDate, description: String, locationId: Int): Transaction

@@ -115,6 +115,10 @@ public class Mutation implements GraphQLMutationResolver {
 
     public Item updateItem(Integer itemId, String name, String code, Integer recommendedStock, Integer supplierId, ArrayList<Integer> locationIds, ArrayList<Integer> categoryIds, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
+        System.out.println("locationIds: ");
+        if (locationIds != null)
+            for (Integer locationId: locationIds)
+                System.out.println();
         Item item = itemRepository
                 .findById(itemId)
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
@@ -472,6 +476,7 @@ public class Mutation implements GraphQLMutationResolver {
     ) {
         AuthContext.requireAuth(env);
 
+        //TODO refactor
         Account fromAccount = locationId == null
                 ? accountRepository
                     .findByName(Account.WAREHOUSE)
@@ -620,7 +625,7 @@ public class Mutation implements GraphQLMutationResolver {
         if (fromAccount.getDeletedDate() != null || toAccount.getDeletedDate() != null)
             throw new GraphQLException("One or both accounts in this transaction has been set to inactive.");
 
-        Transaction transaction = transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate, description));
+        Transaction transaction = transactionRepository.save(new Transaction(fromAccount, toAccount, plannedDate, description == null ? "None" : description));
         if (itemId != null && amount != null) addLineToTransaction(transaction.getId(), itemId, amount, env);
 
         transactionMutationRepository.save(new TransactionMutation(transaction, (((AuthContext) env.getContext()).getUser()), LocalDateTime.now(), "Created"));
