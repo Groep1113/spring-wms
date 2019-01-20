@@ -27,6 +27,10 @@ public class TransactionTest {
     private String description = "description";
     private Integer locationId = 1;
 
+    private Account warehouseAccount;
+    private Account supplierAccount;
+    private Account inUseAccount;
+
     private UserRepo                userRepo;
     private ItemRepo                itemRepo;
     private SupplierRepo            supplierRepo;
@@ -91,6 +95,9 @@ public class TransactionTest {
         this.plannedDate = LocalDate.now();
         this.description = "description";
         this.locationId = 1;
+        this.warehouseAccount = new Account(Account.WAREHOUSE);
+        this.supplierAccount = new Account(Account.SUPPLIER);
+        this.inUseAccount = new Account((Account.IN_USE));
     }
 
     @Test
@@ -101,12 +108,16 @@ public class TransactionTest {
 
     @Test
     public void canCreateReservation() {
-        Transaction transaction = mutation.createReservationTransaction(itemId, amount, plannedDate, description, locationId, this.mockDFE);
-        assertNotNull("created reservation should not be null", transaction);
+        Transaction transaction = new Transaction(warehouseAccount, inUseAccount, plannedDate, description);
+        transactionRepo.setTransaction(transaction);
+
+        Transaction actual = mutation.createReservationTransaction(itemId, amount, plannedDate, description, locationId, this.mockDFE);
+
+        assertNotNull("created reservation should not be null", actual);
     }
 
     @Test(expected = GraphQLException.class)
-    public void cantCreateOrderWithoutAdminAuth() {
+    public void canNotCreateOrderWithoutAdminAuth() {
         mutation.createOrderTransaction(itemId, amount, plannedDate, description, locationId, this.mockDFE);
     }
 
@@ -116,28 +127,41 @@ public class TransactionTest {
         Role role = new Role();
         role.setName(Role.ADMIN);
         user.getRoles().add(role);
-        Transaction transaction = mutation.createOrderTransaction(itemId, amount, plannedDate, description, locationId, this.mockDFE);
-        assertNotNull("created reservation should not be null", transaction);
+
+        Transaction transaction = new Transaction(warehouseAccount, inUseAccount, plannedDate, description);
+        transactionRepo.setTransaction(transaction);
+
+        Transaction actual = mutation.createOrderTransaction(itemId, amount, plannedDate, description, locationId, this.mockDFE);
+        assertNotNull("created reservation should not be null", actual);
     }
 
     @Test
     public void canCreateReturn() {
-        Transaction transaction = mutation.createReturnTransaction(itemId, amount, plannedDate, description, locationId, this.mockDFE);
-        assertNotNull("created reservation should not be null", transaction);
+        Transaction transaction = new Transaction(warehouseAccount, inUseAccount, plannedDate, description);
+        transactionRepo.setTransaction(transaction);
+
+        Transaction actual = mutation.createReturnTransaction(itemId, amount, plannedDate, description, locationId, this.mockDFE);
+        assertNotNull("created reservation should not be null", actual);
     }
 
     @Test
     public void canCreateLocation() {
         Integer fromLoc = 1;
         Integer toLoc = 2;
-        Transaction transaction = mutation.createLocationTransaction(itemId, amount, plannedDate, description, fromLoc, toLoc, this.mockDFE);
-        assertNotNull("created reservation should not be null", transaction);
+        Transaction transaction = new Transaction(warehouseAccount, warehouseAccount, plannedDate, description);
+        transactionRepo.setTransaction(transaction);
+
+        Transaction actual = mutation.createLocationTransaction(itemId, amount, plannedDate, description, fromLoc, toLoc, this.mockDFE);
+        assertNotNull("created reservation should not be null", actual);
     }
 
     @Test
     public void canCreateWriteOff() {
-        Transaction transaction = mutation.createWriteOffTransaction(itemId, amount, plannedDate, description, locationId, this.mockDFE);
-        assertNotNull("created reservation should not be null", transaction);
+        Transaction transaction = new Transaction(warehouseAccount, inUseAccount, plannedDate, description);
+        transactionRepo.setTransaction(transaction);
+
+        Transaction actual = mutation.createWriteOffTransaction(itemId, amount, plannedDate, description, locationId, this.mockDFE);
+        assertNotNull("created reservation should not be null", actual);
     }
 
     @Test
@@ -156,7 +180,21 @@ public class TransactionTest {
         Transaction transaction = new Transaction(new Account(Account.WAREHOUSE), new Account(Account.IN_USE), null, description);
         transaction.setDeletedDate(LocalDate.now());
         transactionRepo.setTransaction(transaction);
+
+
         ArrayList<Transaction> transactions = (ArrayList<Transaction>) query.getTransactions(false, null, true, null, null, null, null, mockDFE);
         assertEquals(new ArrayList<>(), transactions);
+    }
+
+    @Test
+    public void canUpdateTransaction() {
+        Transaction transaction = new Transaction(new Account(Account.WAREHOUSE), new Account(Account.IN_USE), null, description);
+        transaction.setId(1);
+        transactionRepo.setTransaction(transaction);
+
+        Transaction actual = mutation.updateTransaction(1, plannedDate, description, mockDFE);
+
+        Transaction expected = new Transaction(new Account(Account.WAREHOUSE), new Account(Account.IN_USE), plannedDate, description);
+        assertEquals(expected.getPlannedDate(), actual.getPlannedDate());
     }
 }

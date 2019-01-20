@@ -41,11 +41,12 @@ public class TransactionRepo implements TransactionRepository {
 
     @Override
     public Optional<Transaction> findById(Integer integer) {
-        Account account = new Account("account");
-        Transaction transaction = new Transaction(account, account, null, "description");
-        transaction.setId(integer);
-        transaction.setTransactionLines(new HashSet<>());
-        return Optional.of(transaction);
+//        Account account = new Account("account");
+//        Transaction transaction = new Transaction(account, account, null, "description");
+//        transaction.setId(integer);
+//        transaction.setTransactionLines(new HashSet<>());
+
+        return Optional.of(this.transaction);
     }
 
     @Override
