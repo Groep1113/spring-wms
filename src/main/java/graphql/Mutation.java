@@ -363,6 +363,12 @@ public class Mutation implements GraphQLMutationResolver {
                 .findById(locationId)
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
 
+        for (Item item: location.getItems())
+            itemRemoveLocation(item.getId(), location.getId(), env);
+
+        for (Category category: location.getCategories())
+            categoryRemoveLocation(category.getId(), location.getId(), env);
+
         if (location.getAccount() != null) {
             Account account = location.getAccount();
             account.setName(account.getName() + " location: " + location.getCode() + " (deleted)");
