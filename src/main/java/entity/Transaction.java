@@ -1,14 +1,11 @@
 package entity;
 
-
-import graphql.AuthContext;
 import graphql.GraphQLException;
-import graphql.schema.DataFetchingEnvironment;
-import repository.TransactionMutationRepository;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -57,10 +54,12 @@ public class Transaction {
         this.updateDate = LocalDate.now();
         this.plannedDate = plannedDate == null ? LocalDate.now() : plannedDate;
         this.description = description;
+        this.transactionLines = new HashSet<>();
         this.locked = false;
     }
 
     public Transaction() {
+        this.transactionLines = new HashSet<>();
     }
 
     public Integer getId() {
