@@ -380,6 +380,16 @@ public class Mutation implements GraphQLMutationResolver {
     public Boolean deleteCategory(int id, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
+        Category category = categoryRepository
+                .findById(id)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, Category.class.getSimpleName())));
+
+        for (Location location: category.getLocations())
+            categoryRemoveLocation(category.getId(), location.getId(), env);
+
+        for (Item item: category.getItems())
+            itemRemoveCategory(item.getId(), category.getId(), env);
+
         categoryRepository.delete(categoryRepository
             .findById(id)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, Category.class.getSimpleName()))));

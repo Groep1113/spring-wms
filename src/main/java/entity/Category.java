@@ -17,7 +17,7 @@ public class Category {
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "categories")
     private Set<Item> items;
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
     @JoinTable
     private Set<Location> locations;
 
