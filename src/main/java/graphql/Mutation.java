@@ -514,10 +514,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Transaction createOrderTransaction(Integer itemId, Integer amount, LocalDate plannedDate, String description, Integer locationId, DataFetchingEnvironment env) {
-        Set<String> authorizedRoles = new HashSet<>();
-        authorizedRoles.add(Role.ADMIN);
-        authorizedRoles.add(Role.WAREHOUSE_MANAGER);
-        AuthContext.requireAuth(env, authorizedRoles);
+        AuthContext.requireAuth(env, Role.ORDER_MANAGER);
 
         Account fromAccount = accountRepository
                 .findByName(Account.SUPPLIER)
