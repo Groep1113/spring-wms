@@ -38,13 +38,13 @@ public class AuthContext extends GraphQLContext {
             throw new GraphQLException(UNAUTHORIZED_MSG);
     }
 
-    public static void requireAuth(DataFetchingEnvironment env, Set<String> authorizedRoles) {
+    public static void requireAuth(DataFetchingEnvironment env, String...authorizedRoles) {
         requireAuth(env);
 
         Set<Role> userRoles = ((AuthContext) env.getContext()).getUser().getRoles();
         for (Role userRole: userRoles)
             for (String authorizedRole: authorizedRoles)
-                if (userRole.getName().equals(authorizedRole))
+                if (userRole.getName().equals(authorizedRole) || userRole.getName().equals(Role.ADMIN))
                     return;
         throw new GraphQLException(UNAUTHORIZED_MSG);
     }

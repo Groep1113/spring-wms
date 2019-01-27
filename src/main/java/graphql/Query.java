@@ -150,10 +150,7 @@ public class Query implements GraphQLQueryResolver {
         Transaction transaction = transactionRepository.findById(id).orElse(null);
 
         if (transaction != null && transaction.getFromAccount().getName().equals(Account.SUPPLIER) && transaction.getToAccount().getName().equals(Account.WAREHOUSE)){
-            Set<String> authorizedRoles = new HashSet<>();
-            authorizedRoles.add(Role.ADMIN);
-            authorizedRoles.add(Role.WAREHOUSE_MANAGER);
-            AuthContext.requireAuth(env, authorizedRoles);
+            AuthContext.requireAuth(env, Role.ORDER_MANAGER);
         }
 
         return transaction;
@@ -165,10 +162,7 @@ public class Query implements GraphQLQueryResolver {
         ArrayList<Transaction> transactions = new ArrayList<>();
 
         if (showOrders != null && showOrders) {
-            Set<String> authorizedRoles = new HashSet<>();
-            authorizedRoles.add(Role.ADMIN);
-            authorizedRoles.add(Role.WAREHOUSE_MANAGER);
-            AuthContext.requireAuth(env, authorizedRoles);
+            AuthContext.requireAuth(env, Role.ORDER_MANAGER);
             transactions.addAll((List<Transaction>) transactionRepository.findAllByFromAccountNameAndToAccountName(Account.SUPPLIER, Account.WAREHOUSE));
         }
 
