@@ -82,7 +82,7 @@ public class Mutation implements GraphQLMutationResolver {
 
     public Item createItem(String name, String code, Integer recommendedStock, ArrayList<Integer> locationIds, ArrayList<Integer> categoryIds, Integer supplierId, DataFetchingEnvironment
         env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER, Role.ORDER_MANAGER);
 
         if (locationIds.isEmpty())
             throw new GraphQLException("Can not create item without location.");
@@ -114,11 +114,8 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Item updateItem(Integer itemId, String name, String code, Integer recommendedStock, Integer supplierId, ArrayList<Integer> locationIds, ArrayList<Integer> categoryIds, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
-        System.out.println("locationIds: ");
-        if (locationIds != null)
-            for (Integer locationId: locationIds)
-                System.out.println(locationId);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER, Role.ORDER_MANAGER);
+
         Item item = itemRepository
                 .findById(itemId)
                 .orElseThrow(() -> new GraphQLException(idNotFoundMessage(itemId, Item.class.getSimpleName())));
@@ -155,7 +152,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Location createLocation(String code, int depth, int width, int height, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER);
 
         Location location = new Location(code, depth, width, height);
         locationRepository.save(location);
@@ -165,7 +162,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Location updateLocation(Integer locationId, String code, Integer depth, Integer width, Integer height, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER);
 
         Location location = locationRepository
                 .findById(locationId)
@@ -180,7 +177,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Category createCategory(String name, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER, Role.ORDER_MANAGER);
 
         return categoryRepository.save(new Category(name));
     }
@@ -297,7 +294,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Category updateCategory(int id, String name, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER, Role.ORDER_MANAGER);
 
         Category category = categoryRepository
             .findById(id)
@@ -308,7 +305,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Category categoryAddLocation(int categoryId, int locationId, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER, Role.ORDER_MANAGER);
 
         Category category = categoryRepository
             .findById(categoryId)
@@ -329,7 +326,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Category categoryRemoveLocation(int categoryId, int locationId, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER, Role.ORDER_MANAGER);
 
         Category category = categoryRepository
             .findById(categoryId)
@@ -346,7 +343,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Item deleteItem(int itemId, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER, Role.ORDER_MANAGER);
 
         Item item = itemRepository
                 .findById(itemId)
@@ -357,7 +354,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Boolean deleteLocation(int locationId, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER);
 
         Location location = locationRepository
                 .findById(locationId)
@@ -384,7 +381,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Boolean deleteCategory(int id, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER, Role.ORDER_MANAGER);
 
         Category category = categoryRepository
                 .findById(id)
@@ -476,7 +473,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Balance createBalance(int itemId, Integer accountId, Integer amount, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER);
 
 
         Item item = itemRepository
@@ -585,7 +582,7 @@ public class Mutation implements GraphQLMutationResolver {
     }
 
     public Balance updateBalance(Integer balanceId, int amount, String description, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER);
 
         Balance balance = balanceRepository
                 .findById(balanceId)
@@ -596,6 +593,8 @@ public class Mutation implements GraphQLMutationResolver {
         int transaction_amount;
         Account fromAccount;
         Account toAccount;
+
+
         if (current_amount > amount) {
             transaction_amount = current_amount - amount;
             fromAccount = balance.getAccount();
@@ -862,7 +861,7 @@ public class Mutation implements GraphQLMutationResolver {
     public User updateUser(
         Integer id, String firstName, String lastName, String email, String password, DataFetchingEnvironment env
     ) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.ADMIN);
 
         User user = userRepository.findById(id)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, User.class.getSimpleName())));
