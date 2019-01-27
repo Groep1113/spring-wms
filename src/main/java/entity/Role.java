@@ -8,6 +8,9 @@ public class Role {
 
     public static final String ADMIN = "admin";
     public static final String WAREHOUSE_MANAGER = "warehouse manager";
+    public static final String ORDER_MANAGER = "order manager";
+    public static final String SERVICE_DESK = "service desk";
+
 
     // fields
     @Id
