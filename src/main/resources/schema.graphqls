@@ -161,6 +161,7 @@ type Mutation {
     updateAttribute(attributeId: Int!, name: String, value: String, itemId: Int): Attribute
 
     createUser(firstName: String!, lastName: String!, email: String!, password: String!): User
+    createRole(name: String!): Role
     addRole(userId: Int!, roleId: Int!): User
     removeRole(userId: Int!, roleId: Int!): User
     updateUser(id: Int!, firstName: String, lastName: String, email: String, password: String): User
