@@ -496,7 +496,7 @@ public class Mutation implements GraphQLMutationResolver {
     public Transaction createReservationTransaction(
         Integer itemId, Integer amount, LocalDate plannedDate, String description, Integer locationId, DataFetchingEnvironment env
     ) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.SERVICE_DESK);
 
         //TODO refactor
         Account fromAccount = locationId == null
@@ -614,24 +614,6 @@ public class Mutation implements GraphQLMutationResolver {
         executeTransaction(transaction.getId(), env);
 
         return balance;
-    }
-
-    public Transaction createManualSubtractTransaction(Integer itemId, Integer amount, LocalDate plannedDate, String description, Integer locationId, DataFetchingEnvironment env){
-        AuthContext.requireAuth(env);
-
-        Account fromAccount = locationId == null
-                ? accountRepository
-                .findByName(Account.WAREHOUSE)
-                .orElseGet(() -> accountRepository.save(new Account(Account.WAREHOUSE)))
-                : accountRepository
-                .findByLocationId(locationId)
-                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
-
-        Account toAccount = accountRepository
-                .findByName(Account.WRITE_OFF)
-                .orElseGet(() -> accountRepository.save(new Account(Account.WRITE_OFF)));
-
-        return createTransaction(fromAccount, toAccount, plannedDate, description, itemId, amount, env);
     }
 
     private Transaction createTransaction(Account fromAccount, Account toAccount, LocalDate plannedDate, String description, Integer itemId, Integer amount, DataFetchingEnvironment env) {
@@ -843,6 +825,12 @@ public class Mutation implements GraphQLMutationResolver {
         Transaction transaction = transactionRepository
             .findById(transactionId)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(transactionId, Transaction.class.getSimpleName())));
+
+        if (transaction.getFromAccount().getName().equals(Account.SUPPLIER) && transaction.getToAccount().getName().equals(Account.WAREHOUSE))
+            AuthContext.requireAuth(env, Role.ORDER_MANAGER);
+
+        if (transaction.getFromAccount().getName().equals(Account.WAREHOUSE) && transaction.getToAccount().getName().equals(Account.IN_USE))
+            AuthContext.requireAuth(env, Role.SERVICE_DESK);
 
         if (transaction.getDeletedDate() != null)
             throw new GraphQLException("This transaction has been deleted, and therefore, can not be executed.");
