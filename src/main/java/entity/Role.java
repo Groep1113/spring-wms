@@ -22,6 +22,13 @@ public class Role {
     @ManyToMany(fetch = FetchType.EAGER, mappedBy = "roles")
     private Set<User> users;
 
+    public Role(String name) {
+        this.name = name;
+    }
+
+    public Role() {
+    }
+
     // getters
     public Integer getId() {
         return id;

@@ -416,6 +416,12 @@ public class Mutation implements GraphQLMutationResolver {
         return userRepository.save(user);
     }
 
+    public Role createRole(String name, DataFetchingEnvironment env){
+        AuthContext.requireAuth(env);
+
+        return roleRepository.save(new Role(name));
+    }
+
     public User addRole(int userId, int roleId, DataFetchingEnvironment env) {
         AuthContext.requireAuth(env);
 
