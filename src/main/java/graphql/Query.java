@@ -100,7 +100,7 @@ public class Query implements GraphQLQueryResolver {
     }
 
     public List<Item> getItems(Boolean showDeleted, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER, Role.ORDER_MANAGER);
         ArrayList<Item> items = new ArrayList<>(((List<Item>) itemRepository.findAll()));
 
         if (showDeleted == null || !showDeleted) {
@@ -115,31 +115,31 @@ public class Query implements GraphQLQueryResolver {
     }
 
     public Item getItem(Integer id, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER, Role.ORDER_MANAGER);
 
         return itemRepository.findById(id).orElse(null);
     }
 
     public List<Location> getLocations(DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER);
 
         return ((List<Location>) locationRepository.findAll());
     }
 
     public Location getLocation(Integer id, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER);
 
         return locationRepository.findById(id).orElse(null);
     }
 
     public Category getCategory(Integer id, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER, Role.ORDER_MANAGER);
 
         return categoryRepository.findById(id).orElse(null);
     }
 
     public List<Category> getCategories(DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.WAREHOUSE_MANAGER, Role.ORDER_MANAGER);
 
         return ((List<Category>) categoryRepository.findAll());
     }
@@ -149,9 +149,8 @@ public class Query implements GraphQLQueryResolver {
 
         Transaction transaction = transactionRepository.findById(id).orElse(null);
 
-        if (transaction != null && transaction.getFromAccount().getName().equals(Account.SUPPLIER) && transaction.getToAccount().getName().equals(Account.WAREHOUSE)){
+        if (transaction != null && transaction.getFromAccount().getName().equals(Account.SUPPLIER) && transaction.getToAccount().getName().equals(Account.WAREHOUSE))
             AuthContext.requireAuth(env, Role.ORDER_MANAGER);
-        }
 
         return transaction;
     }
@@ -263,13 +262,13 @@ public class Query implements GraphQLQueryResolver {
     }
 
     public TransactionMutation getTransactionMutation(Integer id, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.ADMIN);
 
         return transactionMutationRepository.findById(id).orElse(null);
     }
 
     public List<TransactionMutation> getTransactionMutations(Integer transactionId, DataFetchingEnvironment env) {
-        AuthContext.requireAuth(env);
+        AuthContext.requireAuth(env, Role.ADMIN);
 
         if (transactionId != null){
             return ((List<TransactionMutation>) transactionMutationRepository.findAllByTransactionId(transactionId));
