@@ -27,6 +27,7 @@ public class DatabaseSeeder {
     private final TransactionLineRepository transactionLineRepository;
     private final BalanceRepository balanceRepository;
     private final RoleRepository roleRepository;
+    private final SuggestionRepository suggestionRepository;
     Logger logger = LoggerFactory.getLogger(DatabaseSeeder.class);
 
     @Autowired
@@ -40,6 +41,7 @@ public class DatabaseSeeder {
                           TransactionLineRepository transactionLineRepository,
                           BalanceRepository balanceRepository,
                           RoleRepository roleRepository,
+                          SuggestionRepository suggestionRepository,
                           JdbcTemplate jdbcTemplate) {
 
         this.userRepository = userRepository;
@@ -52,6 +54,7 @@ public class DatabaseSeeder {
         this.transactionLineRepository = transactionLineRepository;
         this.balanceRepository = balanceRepository;
         this.roleRepository = roleRepository;
+        this.suggestionRepository = suggestionRepository;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -68,6 +71,7 @@ public class DatabaseSeeder {
         new CategoryLocationSeeder(categoryRepository, locationRepository).seed();
         new SupplierSeeder(supplierRepository).seed();
         new ItemSeeder(itemRepository, categoryRepository, supplierRepository).seed();
+        new SuggestionSeeder(suggestionRepository, itemRepository).seed();
         // What are supplier items for?
 //        new SupplierItemSeeder(supplierRepository, itemRepository).seed();
         new TransactionSeeder(transactionRepository, accountRepository).seed();
