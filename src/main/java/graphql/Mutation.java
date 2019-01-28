@@ -2,6 +2,7 @@ package graphql;
 
 import base.TokenManager;
 import com.coxautodev.graphql.tools.GraphQLMutationResolver;
+import controller.SuggestionController;
 import entity.*;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.types.LoginPayload;
@@ -629,7 +630,8 @@ public class Mutation implements GraphQLMutationResolver {
         if (itemId != null && amount != null) addLineToTransaction(transaction.getId(), itemId, amount, env);
 
         transactionMutationRepository.save(new TransactionMutation(transaction, (((AuthContext) env.getContext()).getUser()), LocalDateTime.now(), "Created"));
-
+        SuggestionController suggestionController = SuggestionController.getInstance();
+        suggestionController.checkForPotentialSuggestions(transaction);
         return transaction;
     }
 
