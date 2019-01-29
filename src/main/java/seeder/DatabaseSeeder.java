@@ -73,7 +73,8 @@ public class DatabaseSeeder {
         new ItemSeeder(itemRepository, categoryRepository, supplierRepository).seed();
         new SuggestionSeeder(suggestionRepository, itemRepository).seed();
         // What are supplier items for?
-//        new SupplierItemSeeder(supplierRepository, itemRepository).seed();
+        // new SupplierItemSeeder(supplierRepository, itemRepository).seed();
+        new ItemLocationSeeder(locationRepository, itemRepository).seed();
         new TransactionSeeder(transactionRepository, accountRepository).seed();
         new TransactionLineSeeder(transactionLineRepository, transactionRepository, itemRepository).seed();
         new BalanceSeeder(balanceRepository, transactionRepository).seed();
