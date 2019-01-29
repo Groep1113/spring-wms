@@ -16,6 +16,7 @@ import java.util.Set;
 @Component
 public class Query implements GraphQLQueryResolver {
 
+    private SuggestionRepository suggestionRepository;
     private UserRepository userRepository;
     private RoleRepository roleRepository;
     private SupplierRepository supplierRepository;
@@ -41,7 +42,8 @@ public class Query implements GraphQLQueryResolver {
                  AccountRepository accountRepository,
                  BalanceRepository balanceRepository,
                  AttributeRepository attributeRepository,
-                 TransactionMutationRepository transactionMutationRepository) {
+                 TransactionMutationRepository transactionMutationRepository,
+                 SuggestionRepository suggestionRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.supplierRepository = supplierRepository;
@@ -54,6 +56,7 @@ public class Query implements GraphQLQueryResolver {
         this.balanceRepository = balanceRepository;
         this.attributeRepository = attributeRepository;
         this.transactionMutationRepository = transactionMutationRepository;
+        this.suggestionRepository = suggestionRepository;
     }
 
     // These method names have to line up with the schema.graphqls field definitions
@@ -63,6 +66,12 @@ public class Query implements GraphQLQueryResolver {
         AuthContext.requireAuth(env);
 
         return ((List<User>) userRepository.findAll());
+    }
+
+    public List<Suggestion> getSuggestions(DataFetchingEnvironment env) {
+        AuthContext.requireAuth(env);
+
+        return ((List<Suggestion>) suggestionRepository.findAll());
     }
 
     public User getCurrentUser(DataFetchingEnvironment env) {

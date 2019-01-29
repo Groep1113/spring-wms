@@ -22,7 +22,7 @@ public class UserSeeder extends Seeder {
             String firstName = firstNames[rand.nextInt(firstNames.length)];
             u.setFirstName(firstName);
             u.setLastName(surnames[rand.nextInt(surnames.length)]);
-            u.setEmail(firstName.toLowerCase()   + "@bs-htg.com");
+            u.setEmail(firstName.toLowerCase()   + "@bs-htg.nl");
             u.setPassword("password");
             this.repository.save(u);
         }

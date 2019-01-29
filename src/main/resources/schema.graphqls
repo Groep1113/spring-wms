@@ -16,6 +16,13 @@ type User {
     roles: [Role]!
 }
 
+type Suggestion {
+    id: Int!
+    reason: String!
+    amount: Int!
+    item: Item!
+}
+
 type LoginPayload {
   token: String
   user: User
@@ -109,6 +116,7 @@ type TransactionMutation {
 
 type Query {
     users: [User]!
+    suggestions: [Suggestion]!
     userByMail(email: String!): User
 	user(id: Int!): User
 	suppliers: [Supplier]!
