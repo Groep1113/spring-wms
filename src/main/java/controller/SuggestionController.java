@@ -33,9 +33,6 @@ public class SuggestionController {
         this.balanceRepository = balanceRepository;
         this.itemRepository = itemRepository;
         SuggestionController.setInstance(this);
-
-        Optional<Transaction> transactionOption = transactionRepository.findById(19);
-        checkForPotentialSuggestions(transactionOption.get());
     }
 
     private static void setInstance(SuggestionController s) {
