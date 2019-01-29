@@ -50,16 +50,39 @@ public class SuggestionController {
         if (!transaction.getFromAccount().getName().equals(Account.WAREHOUSE))
             return;
 
+        // TODO: SERIOUSLY Refactor this; Lines get added later than transactions, fix this race condition
+        boolean busywaiting = true;
+        int counter = 0;
+        while(transaction.getTransactionLines().size() == 0 && busywaiting) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {}
+            counter++;
+            // Refresh the transaction and thus its transaction lines
+            Optional<Transaction> transactionGuarantee = transactionRepository.findById(transaction.getId());
+            if(transactionGuarantee.isPresent())
+                transaction = transactionGuarantee.get();
+            // Time out after ~1s...
+            if(counter == 10) {
+                busywaiting = false;
+            }
+        }
+        // End TODO
+
         for (TransactionLine transactionLine : transaction.getTransactionLines()){
+            System.out.println(transactionLine.getItem().getName());
             Item item = transactionLine.getItem();
             Optional<Balance> itemBalanceOptional = balanceRepository.findByAccountAndItem(transaction.getFromAccount(), item);
-            if(!itemBalanceOptional.isPresent())
+            if(!itemBalanceOptional.isPresent()) {
                 continue;
+            }
             Balance itemBalance = itemBalanceOptional.get();
             Integer plannedDepletionAmount = 0;
             for(Transaction plannedTransaction: this.transactionRepository.findByPlannedDateGreaterThanContainingItemNotReceived(LocalDate.now(), item)) {
-                if(!plannedTransaction.getFromAccount().getName().equals(Account.WAREHOUSE))
+                if(!plannedTransaction.getFromAccount().getName().equals(Account.WAREHOUSE)) {
                     continue;
+                }
+
                 for(TransactionLine plannedTransactionLine: plannedTransaction.getTransactionLines()) {
                     if(plannedTransactionLine.getItem().getId().equals(item.getId())) {
                         plannedDepletionAmount += plannedTransactionLine.getAmount();
@@ -67,6 +90,7 @@ public class SuggestionController {
                 }
             }
             Integer plannedBalance = itemBalance.getAmount() - plannedDepletionAmount;
+            System.out.println(plannedBalance);
             if(plannedBalance <= 0) {
                 createOrUpdateSuggestion(item, REASON_BELOW_ZERO, item.getRecommendedStock() + Math.abs(plannedBalance));
             } else if(plannedBalance <= item.getRecommendedStock()) {
