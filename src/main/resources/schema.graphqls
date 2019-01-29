@@ -16,6 +16,13 @@ type User {
     roles: [Role]!
 }
 
+type Suggestion {
+    id: Int!
+    reason: String!
+    amount: Int!
+    item: Item!
+}
+
 type LoginPayload {
   token: String
   user: User
@@ -109,6 +116,7 @@ type TransactionMutation {
 
 type Query {
     users: [User]!
+    suggestions: [Suggestion]!
     userByMail(email: String!): User
 	user(id: Int!): User
 	suppliers: [Supplier]!
@@ -214,6 +222,9 @@ type Mutation {
 
     # Updates the balances and locks the transaction. Also checks if stock wont go below zero before executing.
     executeTransaction(transactionId: Int!): Transaction
+
+    # Deletes a suggestion and creates an order for it.
+    executeSuggestion(suggestionId: Int!): Boolean
 
     # Fake delete action. It only sets the date_deleted to the current day and locks the transaction.
     deleteTransaction(transactionId: Int!): Transaction
