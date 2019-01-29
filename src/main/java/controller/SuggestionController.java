@@ -33,6 +33,9 @@ public class SuggestionController {
         this.balanceRepository = balanceRepository;
         this.itemRepository = itemRepository;
         SuggestionController.setInstance(this);
+
+        Optional<Transaction> transactionOption = transactionRepository.findById(19);
+        checkForPotentialSuggestions(transactionOption.get());
     }
 
     private static void setInstance(SuggestionController s) {
@@ -70,7 +73,6 @@ public class SuggestionController {
         // End TODO
 
         for (TransactionLine transactionLine : transaction.getTransactionLines()){
-            System.out.println(transactionLine.getItem().getName());
             Item item = transactionLine.getItem();
             Optional<Balance> itemBalanceOptional = balanceRepository.findByAccountAndItem(transaction.getFromAccount(), item);
             if(!itemBalanceOptional.isPresent()) {
@@ -79,18 +81,22 @@ public class SuggestionController {
             Balance itemBalance = itemBalanceOptional.get();
             Integer plannedDepletionAmount = 0;
             for(Transaction plannedTransaction: this.transactionRepository.findByPlannedDateGreaterThanContainingItemNotReceived(LocalDate.now(), item)) {
-                if(!plannedTransaction.getFromAccount().getName().equals(Account.WAREHOUSE)) {
+                if(!plannedTransaction.getFromAccount().getName().equals(Account.WAREHOUSE)
+                        && !plannedTransaction.getToAccount().getName().equals(Account.WAREHOUSE)) {
                     continue;
                 }
 
                 for(TransactionLine plannedTransactionLine: plannedTransaction.getTransactionLines()) {
                     if(plannedTransactionLine.getItem().getId().equals(item.getId())) {
-                        plannedDepletionAmount += plannedTransactionLine.getAmount();
+                        if(plannedTransaction.getFromAccount().getName().equals(Account.WAREHOUSE)) {
+                            plannedDepletionAmount += plannedTransactionLine.getAmount();
+                        } else if (plannedTransaction.getToAccount().getName().equals(Account.WAREHOUSE)) {
+                            plannedDepletionAmount -= plannedTransactionLine.getAmount();
+                        }
                     }
                 }
             }
             Integer plannedBalance = itemBalance.getAmount() - plannedDepletionAmount;
-            System.out.println(plannedBalance);
             if(plannedBalance <= 0) {
                 createOrUpdateSuggestion(item, REASON_BELOW_ZERO, item.getRecommendedStock() + Math.abs(plannedBalance));
             } else if(plannedBalance <= item.getRecommendedStock()) {

@@ -223,6 +223,9 @@ type Mutation {
     # Updates the balances and locks the transaction. Also checks if stock wont go below zero before executing.
     executeTransaction(transactionId: Int!): Transaction
 
+    # Deletes a suggestion and creates an order for it.
+    executeSuggestion(suggestionId: Int!): Boolean
+
     # Fake delete action. It only sets the date_deleted to the current day and locks the transaction.
     deleteTransaction(transactionId: Int!): Transaction
 

@@ -18,6 +18,7 @@ import java.util.*;
 @Component
 public class Mutation implements GraphQLMutationResolver {
 
+    private SuggestionRepository suggestionRepository;
     private UserRepository userRepository;
     private ItemRepository itemRepository;
     private SupplierRepository supplierRepository;
@@ -44,7 +45,8 @@ public class Mutation implements GraphQLMutationResolver {
         AccountRepository accountRepository,
         BalanceRepository balanceRepository,
         AttributeRepository attributeRepository,
-        TransactionMutationRepository transactionMutationRepository
+        TransactionMutationRepository transactionMutationRepository,
+        SuggestionRepository suggestionRepository
     ) {
         this.userRepository = userRepository;
         this.itemRepository = itemRepository;
@@ -58,6 +60,7 @@ public class Mutation implements GraphQLMutationResolver {
         this.balanceRepository = balanceRepository;
         this.attributeRepository = attributeRepository;
         this.transactionMutationRepository = transactionMutationRepository;
+        this.suggestionRepository = suggestionRepository;
     }
 
     private String idNotFoundMessage(int id, String entity) {
@@ -526,6 +529,43 @@ public class Mutation implements GraphQLMutationResolver {
                     .orElseThrow(() -> new GraphQLException(idNotFoundMessage(locationId, Location.class.getSimpleName())));
 
         return createTransaction(fromAccount, toAccount, plannedDate, description, itemId, amount, env);
+    }
+
+    public Boolean executeSuggestion(Integer suggestionId) {
+        Optional<Suggestion> suggestionOption = this.suggestionRepository.findById(suggestionId);
+        Optional<Account> fromAccountOption = this.accountRepository.findByName(Account.SUPPLIER);
+        Optional<Account> toAccountOption = this.accountRepository.findByName(Account.WAREHOUSE);
+
+        if(!suggestionOption.isPresent())
+            return false;
+        Suggestion suggestion = suggestionOption.get();
+
+        if(!fromAccountOption.isPresent())
+            return false;
+        Account fromAccount = fromAccountOption.get();
+
+        if(!toAccountOption.isPresent())
+            return false;
+        Account toAccount = toAccountOption.get();
+
+        Transaction order = new Transaction();
+        order.setLocked(false);
+        order.setFromAccount(fromAccount);
+        order.setToAccount(toAccount);
+        order.setPlannedDate(LocalDate.now().plusMonths(1));
+        order.setCreatedDate(LocalDate.now());
+        order.setUpdateDate(LocalDate.now());
+        order.setDescription("Suggestion order for " + suggestion.getItem().getName());
+        transactionRepository.save(order);
+
+        TransactionLine orderLine = new TransactionLine();
+        orderLine.setItem(suggestion.getItem());
+        orderLine.setAmount(suggestion.getAmount());
+        orderLine.setTransaction(order);
+        transactionLineRepository.save(orderLine);
+
+        suggestionRepository.delete(suggestion);
+        return true;
     }
 
     

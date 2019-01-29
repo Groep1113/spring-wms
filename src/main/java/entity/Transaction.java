@@ -60,6 +60,7 @@ public class Transaction {
 
     public Transaction() {
         this.transactionLines = new HashSet<>();
+        this.locked = false;
     }
 
     public Integer getId() {
