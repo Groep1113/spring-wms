@@ -533,12 +533,15 @@ public class Mutation implements GraphQLMutationResolver {
 
     public Boolean executeSuggestion(Integer suggestionId) {
         Optional<Suggestion> suggestionOption = this.suggestionRepository.findById(suggestionId);
-        Optional<Account> fromAccountOption = this.accountRepository.findByName(Account.SUPPLIER);
-        Optional<Account> toAccountOption = this.accountRepository.findByName(Account.WAREHOUSE);
 
         if(!suggestionOption.isPresent())
             return false;
         Suggestion suggestion = suggestionOption.get();
+
+        Optional<Account> fromAccountOption = this.accountRepository.findByName(Account.SUPPLIER);
+        Optional<Account> toAccountOption = this.accountRepository.findById(5);
+
+
 
         if(!fromAccountOption.isPresent())
             return false;

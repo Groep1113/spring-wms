@@ -1,15 +1,12 @@
 package seeder;
 
-import entity.Item;
-import entity.Transaction;
-import entity.TransactionLine;
+import entity.*;
 import org.springframework.data.repository.CrudRepository;
 import repository.ItemRepository;
+import repository.LocationRepository;
 import repository.TransactionRepository;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class TransactionLineSeeder extends Seeder {
     private final ItemRepository itemRepository;
@@ -27,13 +24,43 @@ public class TransactionLineSeeder extends Seeder {
         itemRepository.findAll().forEach(items::add);
         Random rand = new Random();
         for(Transaction transaction: transactionRepository.findAll()) {
+            Account toAccount = transaction.getToAccount();
+            Item usedItem = null;
             for (int i = 0; i < 2; i++) {
+                if(usedItem == null) {
+                    usedItem = findItemWithLocation(items, toAccount.getLocation());
+                } else {
+                    usedItem = findItemWithLocationExcluding(items, toAccount.getLocation(), usedItem);
+                }
+                if(usedItem == null)
+                    continue;
                 TransactionLine tl = new TransactionLine();
                 tl.setAmount(rand.nextInt(10) + 1);
-                tl.setItem(items.get(rand.nextInt(items.size())));
+                tl.setItem(usedItem);
                 tl.setTransaction(transaction);
                 repository.save(tl);
             }
         }
+    }
+
+    private Item findItemWithLocation(List<Item> items, Location location) {
+        return findItemWithLocationExcluding(items, location, null);
+    }
+
+    private Item findItemWithLocationExcluding(List<Item> items, Location location, Item exclusion) {
+        Item foundItem = null;
+        Iterator<Item> itemIterator = items.iterator();
+        while(foundItem == null && itemIterator.hasNext()) {
+            Item currentItem = itemIterator.next();
+            if(currentItem.equals(exclusion))
+                continue;
+            for(Location itemLocation: currentItem.getLocations()) {
+                if(itemLocation.getId().equals(location.getId())) {
+                    foundItem = currentItem;
+                    break;
+                }
+            }
+        }
+        return foundItem;
     }
 }

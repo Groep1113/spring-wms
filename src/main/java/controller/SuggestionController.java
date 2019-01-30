@@ -33,6 +33,8 @@ public class SuggestionController {
         this.balanceRepository = balanceRepository;
         this.itemRepository = itemRepository;
         SuggestionController.setInstance(this);
+        Optional<Transaction> t = transactionRepository.findById(11);
+        checkForPotentialSuggestions(t.get());
     }
 
     private static void setInstance(SuggestionController s) {
@@ -47,9 +49,11 @@ public class SuggestionController {
      * @param transaction The transaction which lines need checking
      */
     public void checkForPotentialSuggestions(Transaction transaction) {
+        System.out.println("Received");
+        System.out.println(transaction.getFromAccount().getName());
         if (!transaction.getFromAccount().getName().equals(Account.WAREHOUSE))
             return;
-
+        System.out.println("Processing");
         // TODO: SERIOUSLY Refactor this; Lines get added later than transactions, fix this race condition
         boolean busywaiting = true;
         int counter = 0;
@@ -65,6 +69,7 @@ public class SuggestionController {
             // Time out after ~1s...
             if(counter == 10) {
                 busywaiting = false;
+                System.out.println("Timed out!");
             }
         }
         // End TODO
@@ -94,6 +99,7 @@ public class SuggestionController {
                 }
             }
             Integer plannedBalance = itemBalance.getAmount() - plannedDepletionAmount;
+            System.out.println(plannedBalance);
             if(plannedBalance <= 0) {
                 createOrUpdateSuggestion(item, REASON_BELOW_ZERO, item.getRecommendedStock() + Math.abs(plannedBalance));
             } else if(plannedBalance <= item.getRecommendedStock()) {
