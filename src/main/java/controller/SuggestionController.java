@@ -49,7 +49,6 @@ public class SuggestionController {
     public void checkForPotentialSuggestions(Transaction transaction) {
         if (!transaction.getFromAccount().getName().equals(Account.WAREHOUSE))
             return;
-
         // TODO: SERIOUSLY Refactor this; Lines get added later than transactions, fix this race condition
         boolean busywaiting = true;
         int counter = 0;

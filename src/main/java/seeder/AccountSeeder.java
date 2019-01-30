@@ -15,7 +15,7 @@ public class AccountSeeder extends Seeder {
 
     @Override
     void seedJob() {
-        String[] names = {Account.SUPPLIER, Account.WAREHOUSE, Account.IN_USE, Account.MANUAL, Account.WRITE_OFF};
+        String[] names = {Account.SUPPLIER, Account.IN_USE, Account.MANUAL, Account.WRITE_OFF};
         Location location = null;
         for (Location testLocation: locationRepository.findAll()){
             location = testLocation;
@@ -24,9 +24,12 @@ public class AccountSeeder extends Seeder {
         for(String name: names) {
             Account account = new Account();
             account.setName(name);
-            if(name.equals(Account.WAREHOUSE)) {
-                account.setLocation(location);
-            }
+            repository.save(account);
+        }
+        for (Location loc: locationRepository.findAll()){
+            Account account = new Account();
+            account.setName(Account.WAREHOUSE);
+            account.setLocation(loc);
             repository.save(account);
         }
     }
