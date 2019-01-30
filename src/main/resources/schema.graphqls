@@ -61,6 +61,7 @@ type Location {
 type Supplier {
     id: Int!
     name: String!
+    items: [Item]!
 }
 
 type Category {

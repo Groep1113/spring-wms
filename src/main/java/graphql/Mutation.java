@@ -941,6 +941,9 @@ public class Mutation implements GraphQLMutationResolver {
         Supplier supplier = supplierRepository.findById(id)
             .orElseThrow(() -> new GraphQLException(idNotFoundMessage(id, Supplier.class.getSimpleName())));
 
+        if (!supplier.getItems().isEmpty())
+            throw new GraphQLException("Can not remove supplier that still has items.");
+
         supplierRepository.delete(supplier);
         return supplier;
     }

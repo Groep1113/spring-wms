@@ -13,7 +13,7 @@ public class Supplier {
 
     private String name;
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "supplier")
     private Set<Item> items;
 
     // getters
