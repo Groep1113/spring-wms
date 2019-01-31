@@ -531,41 +531,28 @@ public class Mutation implements GraphQLMutationResolver {
         return createTransaction(fromAccount, toAccount, plannedDate, description, itemId, amount, env);
     }
 
-    public Boolean executeSuggestion(Integer suggestionId) {
-        Optional<Suggestion> suggestionOption = this.suggestionRepository.findById(suggestionId);
+    public Boolean executeSuggestion(Integer suggestionId, DataFetchingEnvironment env) {
+        Suggestion suggestion = suggestionRepository.findById(suggestionId)
+                .orElseThrow(() -> new GraphQLException(idNotFoundMessage(suggestionId, Suggestion.class.getSimpleName())));
 
-        if(!suggestionOption.isPresent())
-            return false;
-        Suggestion suggestion = suggestionOption.get();
+        Integer locationId = null;
+        for (Location location : suggestion.getItem().getLocations()) {
+            if (balanceRepository.findByAccountAndItem(location.getAccount(), suggestion.getItem()).isPresent()) {
+                locationId = location.getId();
+                break;
+            }
+        }
 
-        Optional<Account> fromAccountOption = this.accountRepository.findByName(Account.SUPPLIER);
-        Optional<Account> toAccountOption = this.accountRepository.findById(5);
+        if (locationId == null)
+            throw new GraphQLException("This item has no defined balance at any location.");
 
-
-
-        if(!fromAccountOption.isPresent())
-            return false;
-        Account fromAccount = fromAccountOption.get();
-
-        if(!toAccountOption.isPresent())
-            return false;
-        Account toAccount = toAccountOption.get();
-
-        Transaction order = new Transaction();
-        order.setLocked(false);
-        order.setFromAccount(fromAccount);
-        order.setToAccount(toAccount);
-        order.setPlannedDate(LocalDate.now().plusMonths(1));
-        order.setCreatedDate(LocalDate.now());
-        order.setUpdateDate(LocalDate.now());
-        order.setDescription("Suggestion order for " + suggestion.getItem().getName());
-        transactionRepository.save(order);
-
-        TransactionLine orderLine = new TransactionLine();
-        orderLine.setItem(suggestion.getItem());
-        orderLine.setAmount(suggestion.getAmount());
-        orderLine.setTransaction(order);
-        transactionLineRepository.save(orderLine);
+        createOrderTransaction(
+                suggestion.getItem().getId(),
+                suggestion.getAmount(),
+                LocalDate.now().plusMonths(1),
+                "Suggestion order for " + suggestion.getItem().getName(),
+                locationId,
+                env);
 
         suggestionRepository.delete(suggestion);
         return true;
