@@ -28,9 +28,13 @@ services:
       MYSQL_PASSWORD: ${DATABASE_PASSWORD}
     networks:
       - backend
+    volumes:
+      - my-datavolume:/var/lib/mysql
   react:
     image: groep1113/react
     ports:
       - "80:80"
 networks:
   backend:
+volumes:
+  my-datavolume:
